@@ -1,6 +1,7 @@
 """Head-to-head games analysis."""
 
-from typing import Any, Dict, List, Optional, Union
+import asyncio
+from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import TypedDict
 
 from .api import get_head_to_head_games, get_game_statistics
@@ -220,42 +221,57 @@ async def h2h(team1_id: int, team2_id: int) -> Optional[H2HResults]:
 async def add_game_statistics_to_h2h_results(
     h2h_results: Optional[H2HResults]
 ) -> H2HResults:
-    """Add detailed game statistics to H2H results."""
+    """Add detailed game statistics to H2H results.
+
+    Fetches all game statistics in parallel using asyncio.gather().
+    """
     if not h2h_results:
         return {}
 
+    # Collect all games with their location info for later matching
+    games_to_fetch: List[Tuple[int, int, int]] = []  # (year, index, game_id)
     for year in h2h_results:
-        games = h2h_results[year]
+        for i, game in enumerate(h2h_results[year]):
+            games_to_fetch.append((year, i, game["id"]))
 
-        for i, game in enumerate(games):
-            game_id = game["id"]
+    if not games_to_fetch:
+        return h2h_results
 
-            # Fetch statistics for the game
-            statistics = await get_game_statistics(game_id)
-            print(f"API request for game ID: {game_id}")
+    # Fetch all game statistics in parallel
+    # Use return_exceptions=True to prevent one failure from breaking all fetches
+    print(f"Fetching statistics for {len(games_to_fetch)} games in parallel...")
+    tasks = [get_game_statistics(game_id) for _, _, game_id in games_to_fetch]
+    all_statistics = await asyncio.gather(*tasks, return_exceptions=True)
 
-            if statistics and len(statistics) >= 2:
-                # Process home team statistics
-                home_team_stats = next(
-                    (s for s in statistics if s.get("team", {}).get("name") == game["home_team"]),
-                    None
-                )
-                if home_team_stats and home_team_stats.get("statistics"):
-                    stats_list = home_team_stats["statistics"]
-                    if stats_list and len(stats_list) > 0:
-                        processed = process_game_stats(stats_list[0])
-                        games[i]["home_statistics"] = processed
+    # Match results back to games
+    for (year, i, _game_id), statistics in zip(games_to_fetch, all_statistics):
+        # Skip if this fetch failed (returned an exception)
+        if isinstance(statistics, Exception):
+            continue
+        game = h2h_results[year][i]
 
-                # Process visitor team statistics
-                visitor_team_stats = next(
-                    (s for s in statistics if s.get("team", {}).get("name") == game["visitor_team"]),
-                    None
-                )
-                if visitor_team_stats and visitor_team_stats.get("statistics"):
-                    stats_list = visitor_team_stats["statistics"]
-                    if stats_list and len(stats_list) > 0:
-                        processed = process_game_stats(stats_list[0])
-                        games[i]["visitor_statistics"] = processed
+        if statistics and len(statistics) >= 2:
+            # Process home team statistics
+            home_team_stats = next(
+                (s for s in statistics if s.get("team", {}).get("name") == game["home_team"]),
+                None
+            )
+            if home_team_stats and home_team_stats.get("statistics"):
+                stats_list = home_team_stats["statistics"]
+                if stats_list and len(stats_list) > 0:
+                    processed = process_game_stats(stats_list[0])
+                    h2h_results[year][i]["home_statistics"] = processed
+
+            # Process visitor team statistics
+            visitor_team_stats = next(
+                (s for s in statistics if s.get("team", {}).get("name") == game["visitor_team"]),
+                None
+            )
+            if visitor_team_stats and visitor_team_stats.get("statistics"):
+                stats_list = visitor_team_stats["statistics"]
+                if stats_list and len(stats_list) > 0:
+                    processed = process_game_stats(stats_list[0])
+                    h2h_results[year][i]["visitor_statistics"] = processed
 
     return h2h_results
 
