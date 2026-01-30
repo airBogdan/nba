@@ -36,8 +36,6 @@ class QuarterAnalysis(TypedDict):
     team1_q4_avg: float
     team2_q4_avg: float
     halftime_leader_wins_pct: float
-    overtime_games: int
-    total_games_analyzed: int
 
 
 class TeamGameStats(TypedDict):
@@ -55,8 +53,8 @@ class H2HSummary(TypedDict):
     team1: str
     team2: str
     total_games: int
-    team1_wins: int
-    team2_wins: int
+    team1_wins_all_time: int
+    team2_wins_all_time: int
     team1_win_pct: float
     team1_home_wins: int
     team1_home_losses: int

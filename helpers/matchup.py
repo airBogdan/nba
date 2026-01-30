@@ -1,7 +1,7 @@
 """Core matchup analysis engine."""
 
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 from typing_extensions import TypedDict
 
@@ -20,7 +20,6 @@ class TeamSnapshot(TypedDict):
     name: str
     record: str
     conf_rank: int
-    conference: str
     games: int
     ppg: float
     opp_ppg: float  # Points allowed (estimated)
@@ -29,26 +28,16 @@ class TeamSnapshot(TypedDict):
     apg: float
     rpg: float
     topg: float
-    ast_to_tov: float
-    stocks_pg: float
     net_rating: float
-    fgp: str
-    tpp: str
-    ftp: str
+    fgp: float
+    tpp: float
     last_ten: str
     last_ten_pct: float
-    form_trajectory: float
     home_record: str
     away_record: str
     home_win_pct: float
     away_win_pct: float
-    is_playoff_pos: bool
     pace: float
-    three_pt_rate: float
-    off_reb_rate: float
-    ft_rate: float
-    pts_per_poss: float
-    spg: float
 
 
 class MatchupEdges(TypedDict):
@@ -57,21 +46,18 @@ class MatchupEdges(TypedDict):
     net_rating: float
     form: float
     turnovers: float
-    assists_ratio: float
     rebounds: float
     fgp: float
     three_pt_pct: float
-    ftp: float
     pace: float
-    off_reb_rate: float
     combined_pace: float
 
 
 class H2HSummaryData(TypedDict):
     """H2H summary data."""
     total_games: int
-    team1_wins: int
-    team2_wins: int
+    team1_wins_all_time: int
+    team2_wins_all_time: int
     team1_win_pct: float
     team1_home_wins: int
     team1_home_losses: int
@@ -94,10 +80,26 @@ class H2HPatterns(TypedDict):
     close_game_pct: float
 
 
+class H2HTeamStats(TypedDict):
+    """Aggregated team stats from H2H box scores."""
+    avg_fgp: float
+    avg_tpp: float
+    avg_rebounds: float
+    avg_assists: float
+    avg_turnovers: float
+    avg_disruption: float  # steals + blocks
+
+
+class H2HMatchupStats(TypedDict):
+    """Matchup-specific stats from H2H games."""
+    team1: H2HTeamStats
+    team2: H2HTeamStats
+
+
 class H2HRecent(TypedDict):
-    """Recent H2H data."""
-    team1_wins: int
-    team2_wins: int
+    """Recent H2H data (last 2 seasons only)."""
+    team1_wins_last_2_seasons: int
+    team2_wins_last_2_seasons: int
     last_winner: str
     home_team_home_record: str
     games_last_2_seasons: int
@@ -109,6 +111,18 @@ class H2H(TypedDict):
     patterns: H2HPatterns
     recent: H2HRecent
     quarters: Optional[QuarterAnalysis]
+    matchup_stats: Optional[H2HMatchupStats]
+
+
+class TeamSchedule(TypedDict):
+    """Schedule/situational context for a team."""
+    days_rest: Optional[int]
+    streak: str  # e.g., "W3", "L2"
+    games_last_7_days: int
+    # Opponent strength context
+    recent_opponent_avg_win_pct: float  # Avg win% of recent opponents
+    quality_wins: int  # Wins vs .500+ teams in recent games
+    quality_losses: int  # Losses vs .500+ teams in recent games
 
 
 class TotalsAnalysis(TypedDict):
@@ -119,9 +133,6 @@ class TotalsAnalysis(TypedDict):
     team2_h2h_scoring_diff: float
     margin_volatility: float
     h2h_total_variance: float
-    turnover_battle: float
-    three_pt_variance: float
-    efficiency_edge: float
     pace_adjusted_total: float
     defense_factor: float
     recent_scoring_trend: float
@@ -131,8 +142,6 @@ class RotationPlayer(TypedDict):
     """Rotation player data."""
     name: str
     ppg: float
-    fgp: float
-    topg: float
     plus_minus: float
     games: int
 
@@ -144,10 +153,8 @@ class TeamPlayers(TypedDict):
     full_strength: bool
     top_scorers: str
     playmaker: str
-    best_defender: str
     hot_hand: str
     star_dependency: float
-    depth_score: float
     depth_rating: str
     bench_scoring: float
 
@@ -156,6 +163,7 @@ class MatchupAnalysis(TypedDict):
     """Complete matchup analysis output."""
     matchup: Dict[str, str]
     current_season: Dict[str, TeamSnapshot]
+    schedule: Dict[str, TeamSchedule]
     recent_games: Dict[str, List[RecentGame]]
     players: Dict[str, Optional[TeamPlayers]]
     h2h: Optional[H2H]
@@ -208,7 +216,6 @@ def build_team_snapshot(
     stats: Optional[ProcessedTeamStats]
 ) -> TeamSnapshot:
     """Build team snapshot with computed metrics."""
-    win_pct = float(standing["win_pct"]) if standing and standing.get("win_pct") else 0.0
     last_ten_pct = standing.get("last_ten_pct", 0.0) if standing else 0.0
 
     ppg = stats.get("ppg", 0.0) if stats else 0.0
@@ -226,7 +233,6 @@ def build_team_snapshot(
         "name": name,
         "record": f"{standing['wins']}-{standing['losses']}" if standing else "N/A",
         "conf_rank": standing.get("conference_rank", 0) if standing else 0,
-        "conference": standing.get("conference", "N/A") if standing else "N/A",
         "games": stats.get("games", 0) if stats else 0,
         "ppg": ppg,
         "opp_ppg": opp_ppg,
@@ -235,26 +241,16 @@ def build_team_snapshot(
         "apg": stats.get("apg", 0.0) if stats else 0.0,
         "rpg": stats.get("rpg", 0.0) if stats else 0.0,
         "topg": stats.get("topg", 0.0) if stats else 0.0,
-        "ast_to_tov": stats.get("ast_to_tov", 0.0) if stats else 0.0,
-        "stocks_pg": stats.get("stocks_pg", 0.0) if stats else 0.0,
         "net_rating": net_rating,
-        "fgp": stats.get("fgp", "0") if stats else "0",
-        "tpp": stats.get("tpp", "0") if stats else "0",
-        "ftp": stats.get("ftp", "0") if stats else "0",
+        "fgp": stats.get("fgp", 0.0) if stats else 0.0,
+        "tpp": stats.get("tpp", 0.0) if stats else 0.0,
         "last_ten": f"{standing['last_ten_wins']}-{standing['last_ten_losses']}" if standing else "N/A",
         "last_ten_pct": last_ten_pct,
-        "form_trajectory": round(last_ten_pct - win_pct, 3),
         "home_record": f"{standing['home_wins']}-{standing['home_losses']}" if standing else "N/A",
         "away_record": f"{standing['away_wins']}-{standing['away_losses']}" if standing else "N/A",
         "home_win_pct": standing.get("home_win_pct", 0.0) if standing else 0.0,
         "away_win_pct": standing.get("away_win_pct", 0.0) if standing else 0.0,
-        "is_playoff_pos": standing.get("is_playoff_pos", False) if standing else False,
         "pace": pace,
-        "three_pt_rate": stats.get("three_pt_rate", 0.0) if stats else 0.0,
-        "off_reb_rate": stats.get("off_reb_rate", 0.0) if stats else 0.0,
-        "ft_rate": stats.get("ft_rate", 0.0) if stats else 0.0,
-        "pts_per_poss": round(ppg / pace * 100, 1) if pace else 0.0,
-        "spg": stats.get("spg", 0.0) if stats else 0.0,
     }
 
 
@@ -265,13 +261,10 @@ def compute_edges(team1: TeamSnapshot, team2: TeamSnapshot) -> MatchupEdges:
         "net_rating": round(team1["net_rating"] - team2["net_rating"], 2),
         "form": round(team1["last_ten_pct"] - team2["last_ten_pct"], 2),
         "turnovers": round(team2["topg"] - team1["topg"], 1),  # positive = team1 turns it over less
-        "assists_ratio": round(team1["ast_to_tov"] - team2["ast_to_tov"], 2),
         "rebounds": round(team1["rpg"] - team2["rpg"], 1),
-        "fgp": round(float(team1["fgp"]) - float(team2["fgp"]), 1),
-        "three_pt_pct": round(float(team1["tpp"]) - float(team2["tpp"]), 1),
-        "ftp": round(float(team1["ftp"]) - float(team2["ftp"]), 1),
+        "fgp": round(team1["fgp"] - team2["fgp"], 1),
+        "three_pt_pct": round(team1["tpp"] - team2["tpp"], 1),
         "pace": round(team1["pace"] - team2["pace"], 1),
-        "off_reb_rate": round(team1["off_reb_rate"] - team2["off_reb_rate"], 1),
         "combined_pace": round((team1["pace"] + team2["pace"]) / 2, 1),
     }
 
@@ -312,11 +305,92 @@ def compute_recent_h2h(
     home_wins = sum(1 for g in home_games if g["winner"] == home_team)
 
     return {
-        "team1_wins": team1_wins,
-        "team2_wins": team2_wins,
+        "team1_wins_last_2_seasons": team1_wins,
+        "team2_wins_last_2_seasons": team2_wins,
         "last_winner": recent_games[-1]["winner"] if recent_games else "N/A",
         "home_team_home_record": f"{home_wins}-{len(home_games) - home_wins}",
         "games_last_2_seasons": len(recent_games),
+    }
+
+
+def compute_h2h_matchup_stats(
+    h2h_results: Optional[H2HResults],
+    team1_name: str,
+    team2_name: str
+) -> Optional[H2HMatchupStats]:
+    """Compute aggregated stats for each team from H2H box scores."""
+    if not h2h_results:
+        return None
+
+    # Collect stats for each team
+    team1_stats = {
+        "fgp": [], "tpp": [],
+        "rebounds": [], "assists": [], "turnovers": [],
+        "disruption": []  # steals + blocks
+    }
+    team2_stats = {
+        "fgp": [], "tpp": [],
+        "rebounds": [], "assists": [], "turnovers": [],
+        "disruption": []
+    }
+
+    for games in h2h_results.values():
+        for game in games:
+            home_stats = game.get("home_statistics")
+            visitor_stats = game.get("visitor_statistics")
+
+            if not home_stats or not visitor_stats:
+                continue
+
+            # Determine which stats belong to which team
+            is_team1_home = game["home_team"] == team1_name
+            t1_stats = home_stats if is_team1_home else visitor_stats
+            t2_stats = visitor_stats if is_team1_home else home_stats
+
+            # Collect team1 stats
+            team1_stats["fgp"].append(float(t1_stats.get("fgp", 0) or 0))
+            team1_stats["tpp"].append(float(t1_stats.get("tpp", 0) or 0))
+            team1_stats["rebounds"].append(t1_stats.get("totReb", 0) or 0)
+            team1_stats["assists"].append(t1_stats.get("assists", 0) or 0)
+            team1_stats["turnovers"].append(t1_stats.get("turnovers", 0) or 0)
+            t1_steals = t1_stats.get("steals", 0) or 0
+            t1_blocks = t1_stats.get("blocks", 0) or 0
+            team1_stats["disruption"].append(t1_steals + t1_blocks)
+
+            # Collect team2 stats
+            team2_stats["fgp"].append(float(t2_stats.get("fgp", 0) or 0))
+            team2_stats["tpp"].append(float(t2_stats.get("tpp", 0) or 0))
+            team2_stats["rebounds"].append(t2_stats.get("totReb", 0) or 0)
+            team2_stats["assists"].append(t2_stats.get("assists", 0) or 0)
+            team2_stats["turnovers"].append(t2_stats.get("turnovers", 0) or 0)
+            t2_steals = t2_stats.get("steals", 0) or 0
+            t2_blocks = t2_stats.get("blocks", 0) or 0
+            team2_stats["disruption"].append(t2_steals + t2_blocks)
+
+    games_count = len(team1_stats["fgp"])
+    if games_count == 0:
+        return None
+
+    def avg(lst: list) -> float:
+        return round(sum(lst) / len(lst), 1) if lst else 0.0
+
+    return {
+        "team1": {
+            "avg_fgp": avg(team1_stats["fgp"]),
+            "avg_tpp": avg(team1_stats["tpp"]),
+            "avg_rebounds": avg(team1_stats["rebounds"]),
+            "avg_assists": avg(team1_stats["assists"]),
+            "avg_turnovers": avg(team1_stats["turnovers"]),
+            "avg_disruption": avg(team1_stats["disruption"]),
+        },
+        "team2": {
+            "avg_fgp": avg(team2_stats["fgp"]),
+            "avg_tpp": avg(team2_stats["tpp"]),
+            "avg_rebounds": avg(team2_stats["rebounds"]),
+            "avg_assists": avg(team2_stats["assists"]),
+            "avg_turnovers": avg(team2_stats["turnovers"]),
+            "avg_disruption": avg(team2_stats["disruption"]),
+        },
     }
 
 
@@ -382,6 +456,66 @@ def compute_streak(recent_games: List[RecentGame]) -> Dict[str, Any]:
             break
 
     return {"type": first_result, "count": count}
+
+
+def compute_games_last_n_days(recent_games: List[RecentGame], days: int = 7) -> int:
+    """Count games played in the last N days."""
+    if not recent_games:
+        return 0
+
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    cutoff = today - timedelta(days=days)
+    count = 0
+
+    for game in recent_games:
+        game_date = datetime.strptime(game["date"], "%Y-%m-%d")
+        if game_date >= cutoff:
+            count += 1
+
+    return count
+
+
+def compute_schedule_context(recent_games: List[RecentGame]) -> TeamSchedule:
+    """Compute schedule/situational context for a team."""
+    days_rest = compute_days_rest(recent_games)
+    streak_data = compute_streak(recent_games)
+    games_last_7 = compute_games_last_n_days(recent_games, 7)
+
+    # Format streak as string (e.g., "W3", "L2")
+    if streak_data["type"] and streak_data["count"] > 0:
+        streak_str = f"{streak_data['type']}{streak_data['count']}"
+    else:
+        streak_str = "N/A"
+
+    # Compute opponent strength metrics
+    total_opp_win_pct = 0.0
+    valid_opp_count = 0
+    quality_wins = 0
+    quality_losses = 0
+
+    for game in recent_games:
+        opp_win_pct = game.get("vs_win_pct", 0.0)
+        if opp_win_pct > 0:  # Only count if we have valid data
+            total_opp_win_pct += opp_win_pct
+            valid_opp_count += 1
+
+            # Quality game = opponent is .500 or better
+            if opp_win_pct >= 0.5:
+                if game["result"] == "W":
+                    quality_wins += 1
+                else:
+                    quality_losses += 1
+
+    recent_opponent_avg_win_pct = round(total_opp_win_pct / valid_opp_count, 3) if valid_opp_count > 0 else 0.0
+
+    return {
+        "days_rest": days_rest,
+        "streak": streak_str,
+        "games_last_7_days": games_last_7,
+        "recent_opponent_avg_win_pct": recent_opponent_avg_win_pct,
+        "quality_wins": quality_wins,
+        "quality_losses": quality_losses,
+    }
 
 
 def generate_signals(
@@ -482,16 +616,16 @@ def generate_signals(
         concerns = team2_players["availability_concerns"][:2]
         signals.append(f"{team2['name']} injury concerns: {', '.join(concerns)}")
 
-    # Form signals
-    if team1["form_trajectory"] > 0.1:
-        signals.append(f"{team1['name']} trending up ({team1['last_ten']} L10, +{team1['form_trajectory'] * 100:.0f}% vs season)")
-    elif team1["form_trajectory"] < -0.1:
-        signals.append(f"{team1['name']} trending down ({team1['last_ten']} L10)")
+    # Form signals (based on last 10 games)
+    if team1["last_ten_pct"] >= 0.7:
+        signals.append(f"{team1['name']} hot form ({team1['last_ten']} L10)")
+    elif team1["last_ten_pct"] <= 0.3:
+        signals.append(f"{team1['name']} struggling ({team1['last_ten']} L10)")
 
-    if team2["form_trajectory"] > 0.1:
-        signals.append(f"{team2['name']} trending up ({team2['last_ten']} L10, +{team2['form_trajectory'] * 100:.0f}% vs season)")
-    elif team2["form_trajectory"] < -0.1:
-        signals.append(f"{team2['name']} trending down ({team2['last_ten']} L10)")
+    if team2["last_ten_pct"] >= 0.7:
+        signals.append(f"{team2['name']} hot form ({team2['last_ten']} L10)")
+    elif team2["last_ten_pct"] <= 0.3:
+        signals.append(f"{team2['name']} struggling ({team2['last_ten']} L10)")
 
     # Home/away performance
     if home_snapshot["home_win_pct"] > 0.6:
@@ -522,10 +656,10 @@ def generate_signals(
         recent = h2h["recent"]
 
         if recent["games_last_2_seasons"] >= 3:
-            if recent["team1_wins"] > recent["team2_wins"] + 1:
-                signals.append(f"{team1['name']} {recent['team1_wins']}-{recent['team2_wins']} in recent H2H")
-            elif recent["team2_wins"] > recent["team1_wins"] + 1:
-                signals.append(f"{team2['name']} {recent['team2_wins']}-{recent['team1_wins']} in recent H2H")
+            if recent["team1_wins_last_2_seasons"] > recent["team2_wins_last_2_seasons"] + 1:
+                signals.append(f"{team1['name']} {recent['team1_wins_last_2_seasons']}-{recent['team2_wins_last_2_seasons']} in recent H2H")
+            elif recent["team2_wins_last_2_seasons"] > recent["team1_wins_last_2_seasons"] + 1:
+                signals.append(f"{team2['name']} {recent['team2_wins_last_2_seasons']}-{recent['team1_wins_last_2_seasons']} in recent H2H")
 
         if summary["recent_trend"] != "balanced":
             hot_team = team1["name"] if summary["recent_trend"] == "team1_hot" else team2["name"]
@@ -555,6 +689,56 @@ def generate_signals(
     # High variance warning
     if totals_analysis["h2h_total_variance"] > 15:
         signals.append(f"High-variance H2H (±{totals_analysis['h2h_total_variance']} pts std dev in totals)")
+
+    # === H2H vs SEASON PERFORMANCE SIGNALS ===
+    if h2h and h2h.get("matchup_stats"):
+        ms = h2h["matchup_stats"]
+        t1_h2h = ms["team1"]
+        t2_h2h = ms["team2"]
+
+        # FG% comparison (H2H vs season)
+        t1_fgp_diff = t1_h2h["avg_fgp"] - team1["fgp"]
+        t2_fgp_diff = t2_h2h["avg_fgp"] - team2["fgp"]
+
+        if abs(t1_fgp_diff) >= 3:
+            direction = "elevated" if t1_fgp_diff > 0 else "suppressed"
+            signals.append(f"{team1['name']} FG% {direction} vs {team2['name']}: {t1_h2h['avg_fgp']}% H2H vs {team1['fgp']}% season")
+        if abs(t2_fgp_diff) >= 3:
+            direction = "elevated" if t2_fgp_diff > 0 else "suppressed"
+            signals.append(f"{team2['name']} FG% {direction} vs {team1['name']}: {t2_h2h['avg_fgp']}% H2H vs {team2['fgp']}% season")
+
+        # 3P% comparison
+        t1_tpp_diff = t1_h2h["avg_tpp"] - team1["tpp"]
+        t2_tpp_diff = t2_h2h["avg_tpp"] - team2["tpp"]
+
+        if abs(t1_tpp_diff) >= 4:
+            direction = "hot" if t1_tpp_diff > 0 else "cold"
+            signals.append(f"{team1['name']} {direction} from 3 vs {team2['name']}: {t1_h2h['avg_tpp']}% H2H vs {team1['tpp']}% season")
+        if abs(t2_tpp_diff) >= 4:
+            direction = "hot" if t2_tpp_diff > 0 else "cold"
+            signals.append(f"{team2['name']} {direction} from 3 vs {team1['name']}: {t2_h2h['avg_tpp']}% H2H vs {team2['tpp']}% season")
+
+        # Turnover comparison
+        t1_tov_diff = t1_h2h["avg_turnovers"] - team1["topg"]
+        t2_tov_diff = t2_h2h["avg_turnovers"] - team2["topg"]
+
+        if abs(t1_tov_diff) >= 2:
+            direction = "careless" if t1_tov_diff > 0 else "careful"
+            signals.append(f"{team1['name']} more {direction} vs {team2['name']}: {t1_h2h['avg_turnovers']} H2H vs {team1['topg']} season TOV")
+        if abs(t2_tov_diff) >= 2:
+            direction = "careless" if t2_tov_diff > 0 else "careful"
+            signals.append(f"{team2['name']} more {direction} vs {team1['name']}: {t2_h2h['avg_turnovers']} H2H vs {team2['topg']} season TOV")
+
+        # Rebounding comparison
+        t1_reb_diff = t1_h2h["avg_rebounds"] - team1["rpg"]
+        t2_reb_diff = t2_h2h["avg_rebounds"] - team2["rpg"]
+
+        if abs(t1_reb_diff) >= 3:
+            direction = "dominates" if t1_reb_diff > 0 else "struggles on"
+            signals.append(f"{team1['name']} {direction} boards vs {team2['name']}: {t1_h2h['avg_rebounds']} H2H vs {team1['rpg']} season")
+        if abs(t2_reb_diff) >= 3:
+            direction = "dominates" if t2_reb_diff > 0 else "struggles on"
+            signals.append(f"{team2['name']} {direction} boards vs {team1['name']}: {t2_h2h['avg_rebounds']} H2H vs {team2['rpg']} season")
 
     return signals
 
@@ -603,15 +787,6 @@ def compute_totals_analysis(
             total_var = sum((t - avg_total) ** 2 for t in totals) / len(totals)
             h2h_total_variance = round(math.sqrt(total_var), 1)
 
-    # Turnover battle
-    turnover_battle = round(team1["spg"] - team2["spg"], 1)
-
-    # 3PT variance
-    three_pt_variance = round(team1["three_pt_rate"] + team2["three_pt_rate"], 1)
-
-    # Efficiency edge
-    efficiency_edge = round(team1["pts_per_poss"] - team2["pts_per_poss"], 1)
-
     # Pace-adjusted total
     combined_pace = (team1["pace"] + team2["pace"]) / 2
     combined_ortg = (team1["ortg"] + team2["ortg"]) / 2
@@ -646,9 +821,6 @@ def compute_totals_analysis(
         "team2_h2h_scoring_diff": team2_h2h_scoring_diff,
         "margin_volatility": margin_volatility,
         "h2h_total_variance": h2h_total_variance,
-        "turnover_battle": turnover_battle,
-        "three_pt_variance": three_pt_variance,
-        "efficiency_edge": efficiency_edge,
         "pace_adjusted_total": pace_adjusted_total,
         "defense_factor": defense_factor,
         "recent_scoring_trend": recent_scoring_trend,
@@ -670,8 +842,6 @@ def build_team_players(
         {
             "name": p["name"],
             "ppg": p["ppg"],
-            "fgp": p["fgp"],
-            "topg": p["topg"],
             "plus_minus": p["plus_minus"],
             "games": p["games"],
         }
@@ -690,7 +860,6 @@ def build_team_players(
     # Sort by different metrics for insights
     by_ppg = sorted(players, key=lambda x: x["ppg"], reverse=True)
     by_apg = sorted(players, key=lambda x: x["apg"], reverse=True)
-    by_spg = sorted(players, key=lambda x: x["spg"], reverse=True)
     by_pm = sorted(players, key=lambda x: x["plus_minus"], reverse=True)
 
     # Top 3 scorers string
@@ -706,9 +875,6 @@ def build_team_players(
         playmaker = f"{playmaker_player['name']} {playmaker_player['apg']} APG (limited: {playmaker_player['games']} games)"
     else:
         playmaker = f"{playmaker_player['name']} {playmaker_player['apg']} APG"
-
-    # Best defender (top SPG)
-    best_defender = f"{by_spg[0]['name'].split()[-1]} {by_spg[0]['spg']} SPG"
 
     # Hot hand (best plus/minus)
     hot_player = by_pm[0]
@@ -740,10 +906,8 @@ def build_team_players(
         "full_strength": full_strength,
         "top_scorers": top_scorers,
         "playmaker": playmaker,
-        "best_defender": best_defender,
         "hot_hand": hot_hand,
         "star_dependency": star_dependency,
-        "depth_score": depth_score,
         "depth_rating": depth_rating,
         "bench_scoring": bench_scoring,
     }
@@ -784,13 +948,14 @@ def build_matchup_analysis(input_data: BuildMatchupInput) -> MatchupAnalysis:
         patterns = compute_h2h_patterns(h2h_results)
         recent = compute_recent_h2h(h2h_results, team1_name, home_team)
         quarters = compute_quarter_analysis(h2h_results, team1_name, team2_name)
+        matchup_stats = compute_h2h_matchup_stats(h2h_results, team1_name, team2_name)
 
         if patterns and recent:
             h2h = {
                 "summary": {
                     "total_games": h2h_summary["total_games"],
-                    "team1_wins": h2h_summary["team1_wins"],
-                    "team2_wins": h2h_summary["team2_wins"],
+                    "team1_wins_all_time": h2h_summary["team1_wins_all_time"],
+                    "team2_wins_all_time": h2h_summary["team2_wins_all_time"],
                     "team1_win_pct": h2h_summary["team1_win_pct"],
                     "team1_home_wins": h2h_summary["team1_home_wins"],
                     "team1_home_losses": h2h_summary["team1_home_losses"],
@@ -807,6 +972,7 @@ def build_matchup_analysis(input_data: BuildMatchupInput) -> MatchupAnalysis:
                 "patterns": patterns,
                 "recent": recent,
                 "quarters": quarters,
+                "matchup_stats": matchup_stats,
             }
 
     # Build merged player data
@@ -822,6 +988,10 @@ def build_matchup_analysis(input_data: BuildMatchupInput) -> MatchupAnalysis:
         team1_recent_games,
         team2_recent_games
     )
+
+    # Compute schedule context
+    team1_schedule = compute_schedule_context(team1_recent_games)
+    team2_schedule = compute_schedule_context(team2_recent_games)
 
     # Generate signals
     signals = generate_signals(
@@ -846,6 +1016,10 @@ def build_matchup_analysis(input_data: BuildMatchupInput) -> MatchupAnalysis:
         "current_season": {
             "team1": team1_snapshot,
             "team2": team2_snapshot,
+        },
+        "schedule": {
+            "team1": team1_schedule,
+            "team2": team2_schedule,
         },
         "recent_games": {
             "team1": team1_recent_games,

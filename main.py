@@ -11,13 +11,14 @@ from helpers.api import (
     get_team_statistics_for_seasons,
     get_team_players_statistics,
     get_team_recent_games,
+    get_all_standings,
     process_player_statistics,
     ProcessedPlayerStats,
     RecentGame,
 )
 from helpers.utils import get_current_nba_season_year
 from helpers.teams import get_teams_standings
-from helpers.games import h2h, compute_h2h_summary
+from helpers.games import h2h, compute_h2h_summary, add_game_statistics_to_h2h_results
 from helpers.matchup import build_matchup_analysis
 
 
@@ -57,6 +58,10 @@ async def main() -> None:
         h2h_game_count = sum(len(games) for games in h2h_results.values()) if h2h_results else 0
         print(f"H2H Results: {h2h_game_count} games loaded")
 
+        # Enrich H2H games with detailed box score statistics
+        h2h_results = await add_game_statistics_to_h2h_results(h2h_results)
+        print(f"H2H Game Statistics: enriched {h2h_game_count} games")
+
         h2h_summary = compute_h2h_summary(h2h_results, team1_name, team2_name) if h2h_results else None
         print("H2H Summary: computed")
 
@@ -83,11 +88,15 @@ async def main() -> None:
             team2_players = process_player_statistics(team2_raw_stats or [])
             print(f"{team2_name} Players: {len(team2_players)} rotation players")
 
-            # Fetch recent games
-            team1_recent_games = await get_team_recent_games(team1_id, current_season, 5)
+            # Fetch all standings for opponent strength lookup
+            all_standings = await get_all_standings(current_season)
+            print(f"All Standings: {len(all_standings) if all_standings else 0} teams")
+
+            # Fetch recent games with opponent strength context
+            team1_recent_games = await get_team_recent_games(team1_id, current_season, 5, all_standings)
             print(f"{team1_name} Recent Games: {len(team1_recent_games)} games")
 
-            team2_recent_games = await get_team_recent_games(team2_id, current_season, 5)
+            team2_recent_games = await get_team_recent_games(team2_id, current_season, 5, all_standings)
             print(f"{team2_name} Recent Games: {len(team2_recent_games)} games")
 
         # Build unified matchup analysis

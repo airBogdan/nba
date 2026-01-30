@@ -1,0 +1,396 @@
+{
+  "matchup": {
+    "team1": "Atlanta Hawks",
+    "team2": "Philadelphia 76ers",
+    "home_team": "Atlanta Hawks"
+  },
+  "current_season": {
+    "team1": {
+      "name": "Atlanta Hawks",
+      "record": "13-8",
+      "conf_rank": 5,
+      "games": 25,
+      "ppg": 118.6,
+      "opp_ppg": 118.1,
+      "ortg": 112.6,
+      "drtg": 111.4,
+      "apg": 30.5,
+      "rpg": 43.0,
+      "topg": 15.6,
+      "net_rating": 1.16,
+      "fgp": 48.2,
+      "tpp": 35.2,
+      "last_ten": "7-3",
+      "last_ten_pct": 0.7,
+      "home_record": "4-4",
+      "away_record": "8-4",
+      "home_win_pct": 0.5,
+      "away_win_pct": 0.667,
+      "pace": 106.0
+    },
+    "team2": {
+      "name": "Philadelphia 76ers",
+      "record": "10-9",
+      "conf_rank": 9,
+      "games": 23,
+      "ppg": 115.5,
+      "opp_ppg": 119.2,
+      "ortg": 110.9,
+      "drtg": 113.1,
+      "apg": 25.2,
+      "rpg": 43.9,
+      "topg": 15.7,
+      "net_rating": -2.22,
+      "fgp": 45.3,
+      "tpp": 34.5,
+      "last_ten": "5-5",
+      "last_ten_pct": 0.5,
+      "home_record": "5-5",
+      "away_record": "5-3",
+      "home_win_pct": 0.5,
+      "away_win_pct": 0.625,
+      "pace": 105.4
+    }
+  },
+  "schedule": {
+    "team1": {
+      "days_rest": 1,
+      "streak": "W2",
+      "games_last_7_days": 3,
+      "recent_opponent_avg_win_pct": 0.33,
+      "quality_wins": 2,
+      "quality_losses": 0
+    },
+    "team2": {
+      "days_rest": 1,
+      "streak": "L1",
+      "games_last_7_days": 3,
+      "recent_opponent_avg_win_pct": 0.491,
+      "quality_wins": 0,
+      "quality_losses": 3
+    }
+  },
+  "recent_games": {
+    "team1": [
+      {
+        "vs": "Philadelphia 76ers",
+        "vs_record": "10-9",
+        "vs_win_pct": 0.526,
+        "result": "W",
+        "score": "142-134",
+        "home": false,
+        "margin": 8,
+        "date": "2025-11-30"
+      },
+      {
+        "vs": "Cleveland Cavaliers",
+        "vs_record": "12-9",
+        "vs_win_pct": 0.571,
+        "result": "W",
+        "score": "130-123",
+        "home": true,
+        "margin": 7,
+        "date": "2025-11-29"
+      },
+      {
+        "vs": "Washington Wizards",
+        "vs_record": "2-16",
+        "vs_win_pct": 0.111,
+        "result": "L",
+        "score": "113-132",
+        "home": false,
+        "margin": -19,
+        "date": "2025-11-26"
+      },
+      {
+        "vs": "Charlotte Hornets",
+        "vs_record": "6-14",
+        "vs_win_pct": 0.3,
+        "result": "W",
+        "score": "113-110",
+        "home": true,
+        "margin": 3,
+        "date": "2025-11-23"
+      },
+      {
+        "vs": "New Orleans Pelicans",
+        "vs_record": "3-18",
+        "vs_win_pct": 0.143,
+        "result": "W",
+        "score": "115-98",
+        "home": false,
+        "margin": 17,
+        "date": "2025-11-23"
+      }
+    ],
+    "team2": [
+      {
+        "vs": "Atlanta Hawks",
+        "vs_record": "13-8",
+        "vs_win_pct": 0.619,
+        "result": "L",
+        "score": "134-142",
+        "home": true,
+        "margin": -8,
+        "date": "2025-11-30"
+      },
+      {
+        "vs": "Brooklyn Nets",
+        "vs_record": "3-16",
+        "vs_win_pct": 0.158,
+        "result": "W",
+        "score": "115-103",
+        "home": false,
+        "margin": 12,
+        "date": "2025-11-29"
+      },
+      {
+        "vs": "Orlando Magic",
+        "vs_record": "12-8",
+        "vs_win_pct": 0.6,
+        "result": "L",
+        "score": "103-144",
+        "home": true,
+        "margin": -41,
+        "date": "2025-11-26"
+      },
+      {
+        "vs": "Miami Heat",
+        "vs_record": "13-7",
+        "vs_win_pct": 0.65,
+        "result": "L",
+        "score": "117-127",
+        "home": true,
+        "margin": -10,
+        "date": "2025-11-23"
+      },
+      {
+        "vs": "Milwaukee Bucks",
+        "vs_record": "9-12",
+        "vs_win_pct": 0.429,
+        "result": "W",
+        "score": "123-114",
+        "home": false,
+        "margin": 9,
+        "date": "2025-11-21"
+      }
+    ]
+  },
+  "players": {
+    "team1": {
+      "rotation": [
+        {
+          "name": "Jalen Johnson",
+          "ppg": 22.2,
+          "plus_minus": 2.0,
+          "games": 21
+        },
+        {
+          "name": "Dyson Daniels",
+          "ppg": 10.1,
+          "plus_minus": 3.7,
+          "games": 23
+        },
+        {
+          "name": "Nickeil Alexander-Walker",
+          "ppg": 19.6,
+          "plus_minus": 1.4,
+          "games": 21
+        },
+        {
+          "name": "Onyeka Okongwu",
+          "ppg": 15.3,
+          "plus_minus": -0.0,
+          "games": 23
+        },
+        {
+          "name": "Trae Young",
+          "ppg": 15.1,
+          "plus_minus": -5.0,
+          "games": 8
+        },
+        {
+          "name": "Kristaps Porzingis",
+          "ppg": 17.7,
+          "plus_minus": 0.1,
+          "games": 15
+        }
+      ],
+      "availability_concerns": [
+        "Trae Young (8/25 games)",
+        "Kristaps Porzingis (15/25 games)"
+      ],
+      "full_strength": false,
+      "top_scorers": "Johnson 22.2, Alexander-Walker 19.6, Porzingis 17.7",
+      "playmaker": "Trae Young 8.1 APG (limited: 8 games)",
+      "hot_hand": "Risacher +4.0",
+      "star_dependency": 18.7,
+      "depth_rating": "balanced (4.0 MPG std dev)",
+      "bench_scoring": 39.7
+    },
+    "team2": {
+      "rotation": [
+        {
+          "name": "Tyrese Maxey",
+          "ppg": 29.9,
+          "plus_minus": 1.3,
+          "games": 23
+        },
+        {
+          "name": "V. Edgecombe",
+          "ppg": 15.3,
+          "plus_minus": 2.5,
+          "games": 19
+        },
+        {
+          "name": "Quentin Grimes",
+          "ppg": 17.2,
+          "plus_minus": 1.4,
+          "games": 20
+        },
+        {
+          "name": "Kelly Oubre Jr.",
+          "ppg": 14.9,
+          "plus_minus": -0.9,
+          "games": 16
+        },
+        {
+          "name": "Dominick Barlow",
+          "ppg": 7.8,
+          "plus_minus": -1.7,
+          "games": 14
+        },
+        {
+          "name": "Joel Embiid",
+          "ppg": 18.8,
+          "plus_minus": 1.2,
+          "games": 8
+        }
+      ],
+      "availability_concerns": [
+        "Kelly Oubre Jr. (16/23 games)",
+        "Dominick Barlow (14/23 games)",
+        "Joel Embiid (8/23 games)",
+        "Paul George (5/23 games)"
+      ],
+      "full_strength": false,
+      "top_scorers": "Maxey 29.9, Embiid 18.8, Grimes 17.2",
+      "playmaker": "Tyrese Maxey 6.9 APG",
+      "hot_hand": "Edgecombe +2.5",
+      "star_dependency": 25.9,
+      "depth_rating": "star-dependent (5.9 MPG std dev)",
+      "bench_scoring": 40.3
+    }
+  },
+  "h2h": {
+    "summary": {
+      "total_games": 10,
+      "team1_wins_all_time": 6,
+      "team2_wins_all_time": 4,
+      "team1_win_pct": 0.6,
+      "team1_home_wins": 3,
+      "team1_home_losses": 2,
+      "team1_away_wins": 3,
+      "team1_away_losses": 2,
+      "avg_point_diff": 0.7,
+      "team1_avg_points": 122.1,
+      "team2_avg_points": 121.4,
+      "last_5_games": [
+        "Atlanta Hawks",
+        "Philadelphia 76ers",
+        "Atlanta Hawks",
+        "Atlanta Hawks",
+        "Atlanta Hawks"
+      ],
+      "recent_trend": "team1_hot",
+      "close_games": 0,
+      "blowouts": 1
+    },
+    "patterns": {
+      "avg_total": 243.5,
+      "home_win_pct": 0.5,
+      "high_scoring_pct": 0.9,
+      "close_game_pct": 0.0
+    },
+    "recent": {
+      "team1_wins_last_2_seasons": 4,
+      "team2_wins_last_2_seasons": 1,
+      "last_winner": "Atlanta Hawks",
+      "home_team_home_record": "2-1",
+      "games_last_2_seasons": 5
+    },
+    "quarters": {
+      "avg_q1_total": 56.7,
+      "avg_q2_total": 62.2,
+      "avg_q3_total": 59.1,
+      "avg_q4_total": 58.8,
+      "avg_first_half": 118.9,
+      "avg_second_half": 117.9,
+      "team1_q1_avg": 28.8,
+      "team2_q1_avg": 27.9,
+      "team1_q4_avg": 26.9,
+      "team2_q4_avg": 31.9,
+      "halftime_leader_wins_pct": 0.5
+    },
+    "matchup_stats": {
+      "team1": {
+        "avg_fgp": 60.2,
+        "avg_tpp": 37.5,
+        "avg_rebounds": 45.6,
+        "avg_assists": 28.7,
+        "avg_turnovers": 15.9,
+        "avg_disruption": 12.2
+      },
+      "team2": {
+        "avg_fgp": 61.6,
+        "avg_tpp": 35.6,
+        "avg_rebounds": 41.8,
+        "avg_assists": 26.1,
+        "avg_turnovers": 13.8,
+        "avg_disruption": 14.1
+      }
+    }
+  },
+  "totals_analysis": {
+    "expected_total": 237.9,
+    "total_diff_from_h2h": -9.4,
+    "team1_h2h_scoring_diff": -3.5,
+    "team2_h2h_scoring_diff": -5.9,
+    "margin_volatility": 3.0,
+    "h2h_total_variance": 22.3,
+    "pace_adjusted_total": 118.1,
+    "defense_factor": 112.2,
+    "recent_scoring_trend": 7.5
+  },
+  "comparison": {
+    "ppg": 3.1,
+    "net_rating": 3.38,
+    "form": 0.2,
+    "turnovers": 0.1,
+    "rebounds": -0.9,
+    "fgp": 2.9,
+    "three_pt_pct": 0.7,
+    "pace": 0.6,
+    "combined_pace": 105.7
+  },
+  "signals": [
+    "Atlanta Hawks on back-to-back (fatigue factor)",
+    "Philadelphia 76ers on back-to-back (fatigue factor)",
+    "Philadelphia 76ers missing 26% of offense with key players limited",
+    "Philadelphia 76ers stronger closer (+5.0 Q4 avg in H2H)",
+    "Atlanta Hawks injury concerns: Trae Young (8/25 games), Kristaps Porzingis (15/25 games)",
+    "Philadelphia 76ers injury concerns: Kelly Oubre Jr. (16/23 games), Dominick Barlow (14/23 games)",
+    "Atlanta Hawks hot form (7-3 L10)",
+    "Philadelphia 76ers solid on road (5-3)",
+    "Atlanta Hawks +3.1 PPG edge",
+    "Atlanta Hawks significantly better net rating (+3.4)",
+    "Atlanta Hawks 4-1 in recent H2H",
+    "Atlanta Hawks won 4+ of last 5 H2H meetings",
+    "High-scoring matchup (90% H2H games over 220)",
+    "Fast-paced matchup (avg 105.7 possessions) - lean OVER",
+    "Both teams scoring above season avg in recent games (+7.5 combined)",
+    "High-variance H2H (\u00b122.3 pts std dev in totals)",
+    "Atlanta Hawks FG% elevated vs Philadelphia 76ers: 60.2% H2H vs 48.2% season",
+    "Philadelphia 76ers FG% elevated vs Atlanta Hawks: 61.6% H2H vs 45.3% season"
+  ]
+}

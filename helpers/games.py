@@ -78,7 +78,7 @@ def process_h2h_results(games: Optional[List[Any]]) -> Optional[H2HResults]:
     if not current_season_year:
         return None
 
-    cutoff_year = current_season_year - 5
+    cutoff_year = current_season_year - 2
     processed_results: H2HResults = {}
 
     for game in games:
@@ -162,7 +162,6 @@ def compute_quarter_analysis(
     team1_q4 = 0
     team2_q4 = 0
     halftime_leader_wins = 0
-    overtime_games = 0
 
     for game in games_with_quarters:
         home_qs = game["home_linescore"]
@@ -191,10 +190,6 @@ def compute_quarter_analysis(
         if halftime_leader == game["winner"]:
             halftime_leader_wins += 1
 
-        # Overtime detection (more than 4 quarters)
-        if len(home_qs) > 4 or len(visitor_qs) > 4:
-            overtime_games += 1
-
     n = len(games_with_quarters)
 
     return {
@@ -209,8 +204,6 @@ def compute_quarter_analysis(
         "team1_q4_avg": round(team1_q4 / n, 1),
         "team2_q4_avg": round(team2_q4 / n, 1),
         "halftime_leader_wins_pct": round(halftime_leader_wins / n, 2),
-        "overtime_games": overtime_games,
-        "total_games_analyzed": n,
     }
 
 
@@ -335,8 +328,8 @@ def compute_h2h_summary(h2h_results: H2HResults, team1: str, team2: str) -> H2HS
         "team1": team1,
         "team2": team2,
         "total_games": total_games,
-        "team1_wins": team1_wins,
-        "team2_wins": team2_wins,
+        "team1_wins_all_time": team1_wins,
+        "team2_wins_all_time": team2_wins,
         "team1_win_pct": round(team1_wins / total_games, 3) if total_games > 0 else 0.0,
         "team1_home_wins": team1_home_wins,
         "team1_home_losses": team1_home_losses,

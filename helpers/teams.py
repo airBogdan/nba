@@ -10,7 +10,6 @@ from .utils import get_current_nba_season_year
 class SeasonStanding(TypedDict):
     """Processed team standings for a season."""
     season: int
-    conference: str
     conference_rank: int
     wins: int
     losses: int
@@ -25,9 +24,7 @@ class SeasonStanding(TypedDict):
     home_win_pct: float
     away_win_pct: float
     last_ten_pct: float
-    is_playoff_pos: bool
     home_court_advantage: float
-    form_trajectory: float  # last_ten_pct - win_pct (positive = trending up)
 
 
 class RawStanding(TypedDict, total=False):
@@ -60,7 +57,6 @@ def process_standing(season: int, raw: RawStanding) -> SeasonStanding:
 
     return {
         "season": season,
-        "conference": conf.get("name", ""),
         "conference_rank": conf.get("rank", 0),
         "wins": win.get("total", 0),
         "losses": loss.get("total", 0),
@@ -74,9 +70,7 @@ def process_standing(season: int, raw: RawStanding) -> SeasonStanding:
         "home_win_pct": home_win_pct,
         "away_win_pct": away_win_pct,
         "last_ten_pct": last_ten_pct,
-        "is_playoff_pos": conf.get("rank", 99) <= 10,
         "home_court_advantage": round(home_win_pct - away_win_pct, 3),
-        "form_trajectory": round(last_ten_pct - win_pct, 3),
     }
 
 

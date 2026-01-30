@@ -60,12 +60,9 @@ class ProcessedPlayerStats(TypedDict):
     ppg: float
     rpg: float
     apg: float
-    spg: float
-    bpg: float
-    topg: float
+    disruption: float  # steals + blocks per game
     fgp: float
     tpp: float
-    ftp: float
     plus_minus: float
 
 
@@ -98,24 +95,19 @@ class ProcessedTeamStats(TypedDict):
     ppg: float
     apg: float
     rpg: float
-    spg: float
-    bpg: float
     topg: float
-    ast_to_tov: float
+    disruption: float  # steals + blocks per game
     net_rating: float
-    stocks_pg: float
-    three_pt_rate: float
-    tpp: str
-    fgp: str
-    ftp: str
+    tpp: float
+    fgp: float
     pace: float
-    off_reb_rate: float
-    ft_rate: float
 
 
 class RecentGame(TypedDict):
     """Recent game result."""
     vs: str
+    vs_record: str  # Opponent's current record (e.g., "18-3")
+    vs_win_pct: float  # Opponent's win percentage
     result: Literal["W", "L"]
     score: str
     home: bool
@@ -168,6 +160,42 @@ async def get_head_to_head_games(team1_id: int, team2_id: int) -> Optional[List[
 async def get_team_standings(team_id: int, season: int) -> Optional[List[Any]]:
     """Get team standings for a season."""
     return await fetch_nba_api(f"standings?team={team_id}&league=standard&season={season}")
+
+
+async def get_all_standings(season: int) -> Optional[Dict[str, Dict[str, Any]]]:
+    """
+    Get standings for all teams in a season.
+
+    Returns a dict keyed by team name with record info:
+    {
+        "Atlanta Hawks": {"wins": 11, "losses": 8, "win_pct": 0.579},
+        ...
+    }
+    """
+    raw = await fetch_nba_api(f"standings?league=standard&season={season}")
+    if not raw:
+        return None
+
+    standings: Dict[str, Dict[str, Any]] = {}
+    for entry in raw:
+        team_name = entry.get("team", {}).get("name")
+        if not team_name:
+            continue
+
+        win = entry.get("win", {})
+        loss = entry.get("loss", {})
+        wins = win.get("total", 0) or 0
+        losses = loss.get("total", 0) or 0
+        win_pct_str = win.get("percentage", "0")
+        win_pct = float(win_pct_str) if win_pct_str else 0.0
+
+        standings[team_name] = {
+            "wins": wins,
+            "losses": losses,
+            "win_pct": win_pct,
+        }
+
+    return standings
 
 
 async def get_team_statistics(team_id: int, season: int) -> Optional[List[Any]]:
@@ -276,12 +304,9 @@ def process_player_statistics(
             "ppg": round(total_pts / game_count, 1),
             "rpg": round(total_reb / game_count, 1),
             "apg": round(total_ast / game_count, 1),
-            "spg": round(total_stl / game_count, 1),
-            "bpg": round(total_blk / game_count, 1),
-            "topg": round(total_tov / game_count, 1),
+            "disruption": round((total_stl + total_blk) / game_count, 1),
             "fgp": round((total_fgm / total_fga) * 100, 1) if total_fga > 0 else 0.0,
             "tpp": round((total_tpm / total_tpa) * 100, 1) if total_tpa > 0 else 0.0,
-            "ftp": round((total_ftm / total_fta) * 100, 1) if total_fta > 0 else 0.0,
             "plus_minus": round(total_pm / game_count, 1),
         })
 
@@ -306,36 +331,22 @@ def process_team_stats(raw: RawTeamStats) -> ProcessedTeamStats:
     possessions = fga + 0.44 * fta + turnovers - off_reb
     pace = round(possessions / games, 1)
 
-    # Offensive rebound rate: OREB / total rebounds
-    off_reb_rate = round((off_reb / tot_reb) * 100, 1) if tot_reb > 0 else 0.0
-
-    # Free throw rate: FTA per FGA
-    ft_rate = round((fta / fga) * 100, 1) if fga > 0 else 0.0
-
     assists = raw.get("assists", 0) or 0
     steals = raw.get("steals", 0) or 0
     blocks = raw.get("blocks", 0) or 0
     plus_minus = raw.get("plusMinus", 0) or 0
-    tpa = raw.get("tpa", 0) or 0
 
     return {
         "games": raw.get("games", 0),
         "ppg": ppg,
         "apg": round(assists / games, 1),
         "rpg": round(tot_reb / games, 1),
-        "spg": round(steals / games, 1),
-        "bpg": round(blocks / games, 1),
         "topg": round(turnovers / games, 1),
-        "ast_to_tov": round(assists / (turnovers or 1), 2),
+        "disruption": round((steals + blocks) / games, 1),
         "net_rating": round(plus_minus / games, 2),
-        "stocks_pg": round((steals + blocks) / games, 1),
-        "three_pt_rate": round(tpa / games, 1),
-        "tpp": raw.get("tpp", "0"),
-        "fgp": raw.get("fgp", "0"),
-        "ftp": raw.get("ftp", "0"),
+        "tpp": float(raw.get("tpp", "0") or "0"),
+        "fgp": float(raw.get("fgp", "0") or "0"),
         "pace": pace,
-        "off_reb_rate": off_reb_rate,
-        "ft_rate": ft_rate,
     }
 
 
@@ -363,9 +374,18 @@ async def get_team_statistics_for_seasons(
 async def get_team_recent_games(
     team_id: int,
     season: int,
-    limit: int = 5
+    limit: int = 5,
+    all_standings: Optional[Dict[str, Dict[str, Any]]] = None
 ) -> List[RecentGame]:
-    """Get recent completed games for a team."""
+    """
+    Get recent completed games for a team.
+
+    Args:
+        team_id: Team ID to fetch games for
+        season: Season year
+        limit: Number of recent games to return
+        all_standings: Optional dict of all team standings for opponent lookup
+    """
     raw_games = await fetch_nba_api(f"games?team={team_id}&season={season}")
     if not raw_games:
         return []
@@ -404,8 +424,18 @@ async def get_team_recent_games(
             else game["teams"]["home"]["name"]
         )
 
+        # Look up opponent's record
+        vs_record = "N/A"
+        vs_win_pct = 0.0
+        if all_standings and opponent in all_standings:
+            opp_data = all_standings[opponent]
+            vs_record = f"{opp_data['wins']}-{opp_data['losses']}"
+            vs_win_pct = opp_data["win_pct"]
+
         results.append({
             "vs": opponent,
+            "vs_record": vs_record,
+            "vs_win_pct": vs_win_pct,
             "result": "W" if team_points > opp_points else "L",
             "score": f"{team_points}-{opp_points}",
             "home": is_home,
