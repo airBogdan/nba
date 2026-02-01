@@ -16,11 +16,15 @@ from .client import fetch_nba_api, get_team_statistics, get_games_by_date
 
 def parse_minutes(min_str: str) -> float:
     """Parse minutes string (e.g., '32:45') to float."""
-    if not min_str:
+    if not min_str or min_str == '--':
         return 0.0
     parts = min_str.split(":")
-    minutes = int(parts[0]) if parts[0] else 0
-    seconds = int(parts[1]) if len(parts) > 1 and parts[1] else 0
+    # Handle '--' or non-numeric values in parts
+    try:
+        minutes = int(parts[0]) if parts[0] and parts[0] != '--' else 0
+        seconds = int(parts[1]) if len(parts) > 1 and parts[1] and parts[1] != '--' else 0
+    except ValueError:
+        return 0.0
     return minutes + seconds / 60
 
 
@@ -97,7 +101,10 @@ def process_player_statistics(
             total_ftm += g.get("ftm", 0) or 0
             total_fta += g.get("fta", 0) or 0
             pm_str = g.get("plusMinus", "0")
-            total_pm += int(pm_str) if pm_str else 0
+            try:
+                total_pm += int(pm_str) if pm_str and pm_str != '--' else 0
+            except ValueError:
+                pass  # Skip invalid plus/minus values
 
         aggregated.append({
             "id": player_id,
@@ -236,12 +243,22 @@ async def get_team_recent_games(
     if not raw_games:
         return []
 
+    def is_valid_score(score) -> bool:
+        """Check if score is a valid integer (not None, not '--')."""
+        if score is None:
+            return False
+        if isinstance(score, int):
+            return True
+        if isinstance(score, str):
+            return score.isdigit() or (score.startswith('-') and score[1:].isdigit())
+        return False
+
     # Filter to completed games only (status.short === 3 means finished)
     completed = [
         g for g in raw_games
         if g.get("status", {}).get("short") == 3
-        and g.get("scores", {}).get("home", {}).get("points") is not None
-        and g.get("scores", {}).get("visitors", {}).get("points") is not None
+        and is_valid_score(g.get("scores", {}).get("home", {}).get("points"))
+        and is_valid_score(g.get("scores", {}).get("visitors", {}).get("points"))
     ]
 
     # Sort by date descending (most recent first)

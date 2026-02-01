@@ -48,7 +48,10 @@ def process_game_stats(raw: RawGameStats) -> ProcessedGameStats:
     """Process raw game stats into computed metrics."""
     turnovers = raw.get("turnovers", 1) or 1
     plus_minus_str = raw.get("plusMinus", "0")
-    plus_minus = int(plus_minus_str) if plus_minus_str else 0
+    try:
+        plus_minus = int(plus_minus_str) if plus_minus_str and plus_minus_str != '--' else 0
+    except ValueError:
+        plus_minus = 0
     assists = raw.get("assists", 0) or 0
     steals = raw.get("steals", 0) or 0
     blocks = raw.get("blocks", 0) or 0
@@ -117,8 +120,18 @@ def process_h2h_results(games: Optional[List[Any]]) -> Optional[H2HResults]:
         home_linescore_raw = scores.get("home", {}).get("linescore") or []
         visitor_linescore_raw = scores.get("visitors", {}).get("linescore") or []
 
-        home_linescore = [int(q) if q else 0 for q in home_linescore_raw]
-        visitor_linescore = [int(q) if q else 0 for q in visitor_linescore_raw]
+        def parse_quarter_score(q) -> int:
+            """Parse quarter score, returning 0 for invalid values like '--'."""
+            if not q:
+                return 0
+            if isinstance(q, int):
+                return q
+            if isinstance(q, str) and q.isdigit():
+                return int(q)
+            return 0
+
+        home_linescore = [parse_quarter_score(q) for q in home_linescore_raw]
+        visitor_linescore = [parse_quarter_score(q) for q in visitor_linescore_raw]
 
         processed_results[season_year].append({
             "id": game.get("id"),
