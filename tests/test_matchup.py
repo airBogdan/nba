@@ -1,6 +1,5 @@
 """Tests for helpers/matchup.py."""
 
-from datetime import datetime
 from unittest.mock import patch
 
 import pytest
@@ -190,25 +189,23 @@ class TestComputeDaysRest:
         """Returns None for empty recent games list."""
         assert compute_days_rest([]) is None
 
-    @patch("helpers.matchup.datetime")
-    def test_computes_days_since_last_game(self, mock_datetime):
+    def test_computes_days_since_last_game(self):
         """Computes days since last game correctly."""
-        mock_datetime.now.return_value = datetime(2024, 1, 15)
-        mock_datetime.strptime = datetime.strptime
-
         recent = [{"date": "2024-01-13"}]
-        result = compute_days_rest(recent)
+        result = compute_days_rest(recent, game_date="2024-01-15")
         assert result == 2
 
-    @patch("helpers.matchup.datetime")
-    def test_same_day_returns_zero(self, mock_datetime):
+    def test_same_day_returns_zero(self):
         """Returns 0 for game on same day."""
-        mock_datetime.now.return_value = datetime(2024, 1, 15)
-        mock_datetime.strptime = datetime.strptime
-
         recent = [{"date": "2024-01-15"}]
-        result = compute_days_rest(recent)
+        result = compute_days_rest(recent, game_date="2024-01-15")
         assert result == 0
+
+    def test_defaults_to_today_when_no_game_date(self):
+        """Verify backward compatibility - None game_date uses current date."""
+        recent = [{"date": "2024-01-13"}]
+        result = compute_days_rest(recent, game_date=None)
+        assert result is not None  # Just verify it doesn't crash
 
 
 class TestComputeStreak:
@@ -258,37 +255,29 @@ class TestComputeGamesLastNDays:
         """Returns 0 for empty games list."""
         assert compute_games_last_n_days([]) == 0
 
-    @patch("helpers.matchup.datetime")
-    def test_counts_games_in_window(self, mock_datetime):
+    def test_counts_games_in_window(self):
         """Counts games within N day window."""
-        mock_datetime.now.return_value = datetime(2024, 1, 15)
-        mock_datetime.strptime = datetime.strptime
-
         recent = [
             {"date": "2024-01-14"},  # 1 day ago - in window
             {"date": "2024-01-12"},  # 3 days ago - in window
             {"date": "2024-01-10"},  # 5 days ago - in window
             {"date": "2024-01-05"},  # 10 days ago - outside 7 day window
         ]
-        result = compute_games_last_n_days(recent, days=7)
+        result = compute_games_last_n_days(recent, days=7, game_date="2024-01-15")
         assert result == 3
 
 
 class TestComputeScheduleContext:
     """Tests for compute_schedule_context function."""
 
-    @patch("helpers.matchup.datetime")
-    def test_computes_full_context(self, mock_datetime):
+    def test_computes_full_context(self):
         """Computes complete schedule context."""
-        mock_datetime.now.return_value = datetime(2024, 1, 15)
-        mock_datetime.strptime = datetime.strptime
-
         recent = [
             {"date": "2024-01-14", "result": "W", "vs_win_pct": 0.6},
             {"date": "2024-01-12", "result": "W", "vs_win_pct": 0.55},
             {"date": "2024-01-10", "result": "L", "vs_win_pct": 0.7},
         ]
-        result = compute_schedule_context(recent)
+        result = compute_schedule_context(recent, game_date="2024-01-15")
 
         assert result["days_rest"] == 1
         assert result["streak"] == "W2"

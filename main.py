@@ -41,6 +41,7 @@ async def main() -> None:
         team1_name = "Atlanta Hawks"
         team2_name = "Philadelphia 76ers"
         home_team = team1_name  # Set which team is hosting
+        game_date = "2026-01-31"  # Game date for rest calculations (or None for today)
 
         # Get team IDs
         team1_id = await get_team_id_by_name(team1_name)
@@ -114,6 +115,7 @@ async def main() -> None:
             "team2_recent_games": team2_recent_games,
             "h2h_summary": h2h_summary,
             "h2h_results": h2h_results,
+            "game_date": game_date
         })
 
         write_json("matchup_analysis.json", matchup_analysis)
