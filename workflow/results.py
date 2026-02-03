@@ -3,7 +3,7 @@
 import asyncio
 from typing import Any, Dict, List, Optional, Tuple
 
-from helpers.api import get_games_by_date
+from helpers.api import get_game_by_id, get_games_by_date
 from helpers.utils import get_current_nba_season_year
 from .io import (
     JOURNAL_DIR,
@@ -23,57 +23,64 @@ from .types import ActiveBet, BetHistory, CompletedBet, GameResult
 MAX_CONCURRENT_LLM_CALLS = 4
 
 
+def parse_single_game_result(game: Dict[str, Any]) -> GameResult:
+    """Parse a single API game into GameResult."""
+    status_data = game.get("status", {})
+    status_long = status_data.get("long", "").lower()
+
+    # Map API status to our status
+    if status_long == "finished":
+        status = "finished"
+    elif status_long in ("scheduled", "not started"):
+        status = "scheduled"
+    else:
+        status = "in_progress"
+
+    teams = game.get("teams", {})
+    scores = game.get("scores", {})
+
+    home_team = teams.get("home", {}).get("name", "")
+    away_team = teams.get("visitors", {}).get("name", "")
+    home_score = scores.get("home", {}).get("points") or 0
+    away_score = scores.get("visitors", {}).get("points") or 0
+
+    if home_score > away_score:
+        winner = home_team
+    elif away_score > home_score:
+        winner = away_team
+    else:
+        winner = ""
+
+    return {
+        "game_id": str(game.get("id", "")),
+        "home_team": home_team,
+        "away_team": away_team,
+        "home_score": home_score,
+        "away_score": away_score,
+        "winner": winner,
+        "status": status,
+    }
+
+
 def parse_game_results(api_response: Optional[List[Any]]) -> List[GameResult]:
     """Parse API response into GameResult list."""
     if not api_response:
         return []
-
-    results = []
-    for game in api_response:
-        status_data = game.get("status", {})
-        status_long = status_data.get("long", "").lower()
-
-        # Map API status to our status
-        if status_long == "finished":
-            status = "finished"
-        elif status_long in ("scheduled", "not started"):
-            status = "scheduled"
-        else:
-            status = "in_progress"
-
-        teams = game.get("teams", {})
-        scores = game.get("scores", {})
-
-        home_team = teams.get("home", {}).get("name", "")
-        away_team = teams.get("visitors", {}).get("name", "")
-        home_score = scores.get("home", {}).get("points") or 0
-        away_score = scores.get("visitors", {}).get("points") or 0
-
-        if home_score > away_score:
-            winner = home_team
-        elif away_score > home_score:
-            winner = away_team
-        else:
-            winner = ""
-
-        results.append({
-            "game_id": str(game.get("id", "")),
-            "home_team": home_team,
-            "away_team": away_team,
-            "home_score": home_score,
-            "away_score": away_score,
-            "winner": winner,
-            "status": status,
-        })
-
-    return results
+    return [parse_single_game_result(game) for game in api_response]
 
 
 def match_bet_to_result(
     bet: ActiveBet, results: List[GameResult]
 ) -> Optional[GameResult]:
-    """Match bet to game result by comparing team names."""
-    # Parse matchup "Away @ Home" format
+    """Match bet to game result by game ID or team names."""
+    game_id = bet["game_id"]
+
+    # Try exact game ID match first (for numeric API IDs)
+    for r in results:
+        if r["game_id"] == game_id:
+            return r
+
+    # Fallback to team name matching (for legacy bets)
     matchup_parts = bet["matchup"].split(" @ ")
     if len(matchup_parts) != 2:
         return None
@@ -397,12 +404,47 @@ async def run_results_workflow(date: str) -> None:
         print("Could not determine current NBA season")
         return
 
-    # Fetch game results from API
-    print(f"Fetching results for {date}...")
-    api_results = await get_games_by_date(season, date)
+    # Load active bets for this date
+    active = get_active_bets()
+    date_bets = [b for b in active if b["date"] == date]
 
-    # Parse into GameResult, filter to finished games
-    results = parse_game_results(api_results)
+    if not date_bets:
+        print(f"No active bets for {date}")
+        return
+
+    # Separate bets by ID type (numeric API IDs vs legacy filename-based IDs)
+    numeric_id_bets = []
+    legacy_bets = []
+    for bet in date_bets:
+        if bet["game_id"].isdigit():
+            numeric_id_bets.append(bet)
+        else:
+            legacy_bets.append(bet)
+
+    print(f"Fetching results for {date}...")
+    results: List[GameResult] = []
+    seen_game_ids: set[str] = set()
+
+    # Fetch games by ID for new bets (more efficient - only fetch what we need)
+    if numeric_id_bets:
+        print(f"  Fetching {len(numeric_id_bets)} games by ID...")
+        for bet in numeric_id_bets:
+            game = await get_game_by_id(int(bet["game_id"]))
+            if game:
+                result = parse_single_game_result(game)
+                results.append(result)
+                seen_game_ids.add(result["game_id"])
+
+    # Fallback: fetch all games by date for legacy bets (avoid duplicates)
+    if legacy_bets:
+        print(f"  Fetching all games for date (legacy bets)...")
+        api_results = await get_games_by_date(season, date)
+        for result in parse_game_results(api_results):
+            if result["game_id"] not in seen_game_ids:
+                results.append(result)
+                seen_game_ids.add(result["game_id"])
+
+    # Filter to finished games
     finished = [r for r in results if r["status"] == "finished"]
 
     if not finished:
@@ -416,15 +458,6 @@ async def run_results_workflow(date: str) -> None:
         return
 
     print(f"Found {len(finished)} finished games")
-
-    # Load active bets for this date
-    active = get_active_bets()
-    date_bets = [b for b in active if b["date"] == date]
-
-    if not date_bets:
-        print(f"No active bets for {date}")
-        return
-
     print(f"Processing {len(date_bets)} bets...")
 
     # First pass: match bets to results and determine outcomes

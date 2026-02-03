@@ -1,7 +1,7 @@
 """Low-level API client and simple endpoint wrappers."""
 
 import os
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 import aiohttp
 from dotenv import load_dotenv
@@ -79,3 +79,9 @@ async def get_games_by_date(season: int, date: str) -> Optional[List[Any]]:
         date: Date in YYYY-MM-DD format (e.g., '2026-02-01')
     """
     return await fetch_nba_api(f"games?season={season}&league=standard&date={date}")
+
+
+async def get_game_by_id(game_id: int) -> Optional[Dict[str, Any]]:
+    """Get a single game by its API ID."""
+    results = await fetch_nba_api(f"games?id={game_id}")
+    return results[0] if results else None

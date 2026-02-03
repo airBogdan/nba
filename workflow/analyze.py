@@ -252,7 +252,8 @@ async def run_analyze_workflow(date: str, max_bets: int = 3, force: bool = False
 
     async def analyze_with_limit(game: Dict[str, Any]) -> Optional[BetRecommendation]:
         async with semaphore:
-            game_id = extract_game_id(game["_file"])
+            # Prefer api_game_id from JSON, fallback to filename-based ID for legacy files
+            game_id = str(game["api_game_id"]) if game.get("api_game_id") else extract_game_id(game["_file"])
             matchup_str = format_matchup_string(game["matchup"])
             return await analyze_game(game, game_id, matchup_str, strategy)
 

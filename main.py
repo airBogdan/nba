@@ -38,6 +38,7 @@ async def analyze_game(
     away_name: str,
     game_date: str,
     season: int,
+    api_game_id: int,
 ) -> dict:
     """Analyze a single matchup and return the analysis dict."""
     team1_id, team1_name = home_id, home_name
@@ -84,6 +85,7 @@ async def analyze_game(
         "game_date": game_date,
     })
 
+    matchup_analysis["api_game_id"] = api_game_id
     return matchup_analysis
 
 
@@ -118,6 +120,7 @@ async def main() -> None:
                 away_name=away["name"],
                 game_date=game_date,
                 season=season,
+                api_game_id=game["id"],
             )
 
             # Filename: away_vs_home_date.json (standard "@ notation")
