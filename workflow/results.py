@@ -396,20 +396,47 @@ def append_journal_post_game(date: str, completed: List[CompletedBet]) -> None:
     append_text(journal_path, "\n".join(lines))
 
 
-async def run_results_workflow(date: str) -> None:
-    """Run the post-game results workflow."""
+async def run_results_workflow(date: Optional[str] = None) -> None:
+    """Run the post-game results workflow.
+
+    Args:
+        date: Optional date in YYYY-MM-DD format. If not provided, processes all active bets.
+    """
     # Get season
     season = get_current_nba_season_year()
     if not season:
         print("Could not determine current NBA season")
         return
 
-    # Load active bets for this date
+    # Load active bets
+    active = get_active_bets()
+    if not active:
+        print("No active bets")
+        return
+
+    # Determine which dates to process
+    if date:
+        dates_to_process = [date]
+    else:
+        dates_to_process = sorted(set(b["date"] for b in active))
+        print(f"Found active bets for {len(dates_to_process)} date(s): {', '.join(dates_to_process)}")
+
+    # Process each date
+    for process_date in dates_to_process:
+        await _process_results_for_date(process_date, season)
+
+    # Clean up output directory once after all processing
+    clear_output_dir()
+
+
+async def _process_results_for_date(date: str, season: int) -> None:
+    """Process results for a single date."""
+    # Re-read active bets (may have been updated by previous date)
     active = get_active_bets()
     date_bets = [b for b in active if b["date"] == date]
 
     if not date_bets:
-        print(f"No active bets for {date}")
+        print(f"\nNo active bets for {date}")
         return
 
     # Separate bets by ID type (numeric API IDs vs legacy filename-based IDs)
@@ -421,15 +448,16 @@ async def run_results_workflow(date: str) -> None:
         else:
             legacy_bets.append(bet)
 
-    print(f"Fetching results for {date}...")
+    print(f"\nFetching results for {date}...")
     results: List[GameResult] = []
     seen_game_ids: set[str] = set()
 
     # Fetch games by ID for new bets (more efficient - only fetch what we need)
     if numeric_id_bets:
-        print(f"  Fetching {len(numeric_id_bets)} games by ID...")
-        for bet in numeric_id_bets:
-            game = await get_game_by_id(int(bet["game_id"]))
+        unique_game_ids = set(bet["game_id"] for bet in numeric_id_bets)
+        print(f"  Fetching {len(unique_game_ids)} games by ID...")
+        for game_id in unique_game_ids:
+            game = await get_game_by_id(int(game_id))
             if game:
                 result = parse_single_game_result(game)
                 results.append(result)
@@ -538,6 +566,3 @@ async def run_results_workflow(date: str) -> None:
         print(f"{len(unresolved)} bets still pending (games not finished)")
 
     print(f"\nSee bets/journal/{date}.md for details")
-
-    # Clean up output directory
-    clear_output_dir()

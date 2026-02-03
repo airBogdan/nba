@@ -32,7 +32,7 @@ def main():
 
     # results
     results = subparsers.add_parser("results", help="Post-game results")
-    results.add_argument("--date", "-d", required=True, help="YYYY-MM-DD")
+    results.add_argument("--date", "-d", help="YYYY-MM-DD (optional, defaults to all active bets)")
 
     # update-strategy
     subparsers.add_parser("update-strategy", help="Update strategy from history")
@@ -49,7 +49,8 @@ def main():
 
         asyncio.run(run_analyze_workflow(args.date, args.max_bets, args.force))
     elif args.command == "results":
-        validate_date(args.date)
+        if args.date:
+            validate_date(args.date)
         from workflow.results import run_results_workflow
 
         asyncio.run(run_results_workflow(args.date))

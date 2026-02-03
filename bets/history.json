@@ -56,27 +56,95 @@
       "actual_margin": 12,
       "profit_loss": 0.5,
       "reflection": "The primary edge held - Knicks' home dominance and Lakers' availability issues proved decisive despite concerning H2H history. The 12-point margin validated our read on the situational factors, and appropriately sizing down due to H2H uncertainty was the right call."
+    },
+    {
+      "id": "c4d18c92-8ab7-4834-b7fc-24c4fd7d518e",
+      "game_id": "minnesota_timberwolves_vs_memphis_grizzlies_2026-02-03",
+      "matchup": "Minnesota Timberwolves @ Memphis Grizzlies",
+      "bet_type": "moneyline",
+      "pick": "Minnesota Timberwolves",
+      "line": null,
+      "confidence": "high",
+      "units": 2.0,
+      "reasoning": "Minnesota has a dominant +7.3 net rating advantage, is on a 4-game win streak, and just beat Memphis by 17 points at this same venue 2 days ago. Memphis is in complete freefall with a 5-game losing streak, 2-8 L10 record, and significant injury concerns with Morant and Edey. The Grizzlies' poor 9-15 home record diminishes any home court edge.",
+      "primary_edge": "ratings_edge",
+      "date": "2026-02-03",
+      "created_at": "2026-02-02T22:49:38.532055+00:00",
+      "result": "loss",
+      "winner": "Memphis Grizzlies",
+      "final_score": "Minnesota Timberwolves 128 @ Memphis Grizzlies 137",
+      "actual_total": 265,
+      "actual_margin": 9,
+      "profit_loss": -2.0,
+      "reflection": "The ratings edge was real but we overweighted the recent H2H result without accounting for the revenge game dynamic and Minnesota's potential complacency. Memphis scoring 137 points suggests they came out with maximum effort while Minnesota may have taken their foot off the gas."
+    },
+    {
+      "id": "d3e5a0a6-3d91-4089-95ed-ebb873d5076b",
+      "game_id": "houston_rockets_vs_indiana_pacers_2026-02-03",
+      "matchup": "Houston Rockets @ Indiana Pacers",
+      "bet_type": "spread",
+      "pick": "Houston Rockets",
+      "line": 4.5,
+      "confidence": "medium",
+      "units": 1.0,
+      "reasoning": "Houston's elite +6.37 net rating vs Indiana's -7.74 creates a 14.1 point differential - one of the largest mismatches on the slate. Indiana's poor 10-16 home record significantly diminishes their home court advantage. Houston is 7-3 in L10 with quality wins while Indiana's recent OKC upset doesn't offset their overall struggles.",
+      "primary_edge": "ratings_edge",
+      "date": "2026-02-03",
+      "created_at": "2026-02-02T22:49:38.532073+00:00",
+      "result": "win",
+      "winner": "Houston Rockets",
+      "final_score": "Houston Rockets 118 @ Indiana Pacers 114",
+      "actual_total": 232,
+      "actual_margin": -4,
+      "profit_loss": 1.0,
+      "reflection": "The 14-point net rating edge we identified played out almost exactly as expected - Houston won outright by 4 as a +4.5 dog. Indiana's weak home record (10-16) proved to be a reliable indicator that their home court advantage was minimal."
+    },
+    {
+      "id": "898dcbe2-57d2-44f3-8c61-70ba1bca801c",
+      "game_id": "new_orleans_pelicans_vs_charlotte_hornets_2026-02-03",
+      "matchup": "New Orleans Pelicans @ Charlotte Hornets",
+      "bet_type": "total",
+      "pick": "under",
+      "line": 224.5,
+      "confidence": "medium",
+      "units": 1.0,
+      "reasoning": "Both teams are on the second game of a back-to-back, creating significant fatigue. H2H history shows these teams average only 215.8 points per game together. Recent scoring trends show -18.6 combined below season averages. The 224.5 line is inflated relative to the expected total of ~218.",
+      "primary_edge": "situational_fatigue",
+      "date": "2026-02-03",
+      "created_at": "2026-02-02T22:49:38.532079+00:00",
+      "result": "win",
+      "winner": "Charlotte Hornets",
+      "final_score": "New Orleans Pelicans 95 @ Charlotte Hornets 102",
+      "actual_total": 197,
+      "actual_margin": 7,
+      "profit_loss": 1.0,
+      "reflection": "The fatigue edge was even stronger than anticipated - 197 total crushed the 224.5 line by 27.5 points. Process was solid: we identified multiple converging factors (B2B fatigue, H2H history, recent scoring trends) that all pointed the same direction."
     }
   ],
   "summary": {
-    "total_bets": 3,
-    "wins": 2,
-    "losses": 1,
+    "total_bets": 6,
+    "wins": 4,
+    "losses": 2,
     "pushes": 0,
     "win_rate": 0.667,
-    "total_units_wagered": 2.5,
+    "total_units_wagered": 6.5,
     "net_units": 0.5,
-    "roi": 0.2,
+    "roi": 0.077,
     "by_confidence": {
       "medium": {
-        "wins": 1,
+        "wins": 3,
         "losses": 1,
-        "win_rate": 0.5
+        "win_rate": 0.75
       },
       "low": {
         "wins": 1,
         "losses": 0,
         "win_rate": 1.0
+      },
+      "high": {
+        "wins": 0,
+        "losses": 1,
+        "win_rate": 0.0
       }
     },
     "by_primary_edge": {
@@ -86,6 +154,11 @@
         "win_rate": 0.5
       },
       "ratings_edge": {
+        "wins": 2,
+        "losses": 1,
+        "win_rate": 0.667
+      },
+      "rest_advantage": {
         "wins": 1,
         "losses": 0,
         "win_rate": 1.0
@@ -94,8 +167,18 @@
     "by_bet_type": {
       "moneyline": {
         "wins": 2,
-        "losses": 1,
-        "win_rate": 0.667
+        "losses": 2,
+        "win_rate": 0.5
+      },
+      "spread": {
+        "wins": 1,
+        "losses": 0,
+        "win_rate": 1.0
+      },
+      "total": {
+        "wins": 1,
+        "losses": 0,
+        "win_rate": 1.0
       }
     },
     "current_streak": "W2"
