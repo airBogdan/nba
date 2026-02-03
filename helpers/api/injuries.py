@@ -1,6 +1,7 @@
 """Injuries API client."""
 
 import os
+from datetime import date
 from typing import Any, Dict, List, Optional
 
 import aiohttp
@@ -8,21 +9,21 @@ from dotenv import load_dotenv
 
 from .types import Injury
 
-load_dotenv()
-
 
 INJURIES_URL = "nba-injuries-reports.p.rapidapi.com"
-INJURIES_HEADERS = {
-    "x-rapidapi-key": os.environ.get("NBA_RAPID_API_KEY", ""),
-    "x-rapidapi-host": INJURIES_URL,
-}
 
 
-async def fetch_injuries(date: str) -> Optional[List[Dict[str, Any]]]:
-    """Fetch all injuries for a given date.
+def _get_injuries_headers() -> Dict[str, str]:
+    """Get headers for injuries API, loading API key at runtime."""
+    load_dotenv()
+    return {
+        "x-rapidapi-key": os.environ.get("INJURIES_API_KEY", ""),
+        "x-rapidapi-host": INJURIES_URL,
+    }
 
-    Args:
-        date: Date in YYYY-MM-DD format (e.g., '2026-02-03')
+
+async def fetch_injuries() -> Optional[List[Dict[str, Any]]]:
+    """Fetch all injuries for today's date.
 
     Returns:
         List of injury records, each containing:
@@ -33,11 +34,13 @@ async def fetch_injuries(date: str) -> Optional[List[Dict[str, Any]]]:
         - reason: str
         - reportTime: str
     """
-    url = f"https://{INJURIES_URL}/injuries/nba/{date}"
+    today = date.today().strftime("%Y-%m-%d")
+    url = f"https://{INJURIES_URL}/injuries/nba/{today}"
+    headers = _get_injuries_headers()
     timeout = aiohttp.ClientTimeout(total=10)
     try:
         async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.get(url, headers=INJURIES_HEADERS) as response:
+            async with session.get(url, headers=headers) as response:
                 if response.status != 200:
                     print(f"Injuries API returned status {response.status}")
                     return None

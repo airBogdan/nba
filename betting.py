@@ -3,8 +3,29 @@
 
 import argparse
 import asyncio
+import re
 import sys
 from datetime import datetime
+from pathlib import Path
+
+
+OUTPUT_DIR = Path(__file__).parent / "output"
+
+
+def get_dates_from_output() -> list[str]:
+    """Extract unique dates from matchup files in output folder."""
+    if not OUTPUT_DIR.exists():
+        return []
+
+    dates = set()
+    date_pattern = re.compile(r"(\d{4}-\d{2}-\d{2})\.json$")
+
+    for f in OUTPUT_DIR.glob("*.json"):
+        match = date_pattern.search(f.name)
+        if match:
+            dates.add(match.group(1))
+
+    return sorted(dates)
 
 
 def validate_date(date_str: str) -> str:
@@ -26,7 +47,7 @@ def main():
 
     # analyze
     analyze = subparsers.add_parser("analyze", help="Pre-game analysis")
-    analyze.add_argument("--date", "-d", required=True, help="YYYY-MM-DD")
+    analyze.add_argument("--date", "-d", help="YYYY-MM-DD (optional, extracts from output folder)")
     analyze.add_argument("--max-bets", "-m", type=int, default=3)
     analyze.add_argument("--force", "-f", action="store_true", help="Re-analyze even if bets exist")
 
@@ -44,10 +65,20 @@ def main():
 
         run_init()
     elif args.command == "analyze":
-        validate_date(args.date)
+        if args.date:
+            validate_date(args.date)
+            dates = [args.date]
+        else:
+            dates = get_dates_from_output()
+            if not dates:
+                print("Error: No matchup files found in output/. Run main.py first or specify --date.")
+                sys.exit(1)
+            print(f"Found matchups for: {', '.join(dates)}")
+
         from workflow.analyze import run_analyze_workflow
 
-        asyncio.run(run_analyze_workflow(args.date, args.max_bets, args.force))
+        for date in dates:
+            asyncio.run(run_analyze_workflow(date, args.max_bets, args.force))
     elif args.command == "results":
         if args.date:
             validate_date(args.date)

@@ -41,20 +41,18 @@ def read_json(filename: str) -> dict:
 
 
 async def enrich_with_injuries(
-    game_date: str,
     generated_files: list[tuple[str, str, str]],
 ) -> None:
-    """Fetch injuries and enrich output files.
+    """Fetch current injuries and enrich output files.
 
     Args:
-        game_date: Date in YYYY-MM-DD format
         generated_files: List of (filename, home_name, away_name) tuples
     """
     if not generated_files:
         return
 
-    print(f"\nFetching injuries for {game_date}...")
-    injuries = await fetch_injuries(game_date)
+    print("\nFetching current injuries...")
+    injuries = await fetch_injuries()
 
     if not injuries:
         print("No injuries data available")
@@ -75,12 +73,15 @@ async def enrich_with_injuries(
     for filename, home_name, away_name in generated_files:
         data = read_json(filename)
 
-        # Add injuries to players section
-        if "players" in data:
-            if home_name in data["players"]:
-                data["players"][home_name]["injuries"] = injuries_by_team.get(home_name, [])
-            if away_name in data["players"]:
-                data["players"][away_name]["injuries"] = injuries_by_team.get(away_name, [])
+        # Add injuries to players section (keyed as team1/team2)
+        if "players" in data and "matchup" in data:
+            team1_name = data["matchup"].get("team1", "")
+            team2_name = data["matchup"].get("team2", "")
+
+            if "team1" in data["players"]:
+                data["players"]["team1"]["injuries"] = injuries_by_team.get(team1_name, [])
+            if "team2" in data["players"]:
+                data["players"]["team2"]["injuries"] = injuries_by_team.get(team2_name, [])
 
         write_json(filename, data)
 
@@ -198,7 +199,7 @@ async def main() -> None:
     print(f"\nProcessed {len(games)} games.")
 
     # Fetch and apply injuries
-    await enrich_with_injuries(game_date, generated_files)
+    await enrich_with_injuries(generated_files)
 
     print("\nDone.")
 
