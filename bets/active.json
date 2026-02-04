@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "id": "8cde4818-fd1c-4d1d-92d3-aba9cbdb8f8d",
+    "game_id": "16259",
+    "matchup": "Memphis Grizzlies @ Sacramento Kings",
+    "bet_type": "moneyline",
+    "pick": "Memphis Grizzlies",
+    "line": null,
+    "confidence": "medium",
+    "units": 1.0,
+    "reasoning": "Memphis has a 7.3-point net rating advantage over Sacramento, who is in complete freefall with a 5-game losing streak and 1-9 L10 record. The Kings just lost to Washington (13-36) at home, showing a team that has quit. Sacramento's home record (9-16) provides minimal advantage, and Memphis has won 3 of last 5 H2H meetings.",
+    "primary_edge": "ratings_edge",
+    "date": "2026-02-05",
+    "created_at": "2026-02-04T09:13:13.052146+00:00"
+  },
+  {
+    "id": "720c0bdc-6b08-4cdf-b002-36eabcf2c462",
+    "game_id": "16255",
+    "matchup": "Minnesota Timberwolves @ Toronto Raptors",
+    "bet_type": "total",
+    "pick": "under",
+    "line": 224.5,
+    "confidence": "medium",
+    "units": 1.0,
+    "reasoning": "H2H history strongly favors low-scoring games with 209.2 average total and 0% of games exceeding 220. Both teams trending down in scoring (-6.8 combined recent), Minnesota's elite defense (109.9 DRtg) travels well, and Toronto is missing key contributors. Moderate combined pace (103.2) limits possessions.",
+    "primary_edge": "h2h_pattern",
+    "date": "2026-02-05",
+    "created_at": "2026-02-04T09:13:13.052172+00:00"
+  },
+  {
+    "id": "b9dd0755-8cea-414b-9fd9-564801559885",
+    "game_id": "16260",
+    "matchup": "Cleveland Cavaliers @ LA Clippers",
+    "bet_type": "total",
+    "pick": "over",
+    "line": 228.0,
+    "confidence": "medium",
+    "units": 1.0,
+    "reasoning": "100% of H2H games exceeded 220 points with an average of 237.8. Both teams shoot significantly better in this matchup - Clippers +13.8% and Cavaliers +20.3% above their season FG averages. Both teams in strong form (7-3 and 8-2 L10) and Cleveland is more careful with the ball vs Clippers.",
+    "primary_edge": "h2h_pattern",
+    "date": "2026-02-05",
+    "created_at": "2026-02-04T09:13:13.052185+00:00"
+  }
+]

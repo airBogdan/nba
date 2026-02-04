@@ -21,7 +21,7 @@ from .prompts import (
     ANALYZE_GAME_PROMPT,
     SYNTHESIZE_BETS_PROMPT,
     SYSTEM_ANALYST,
-    condense_matchup,
+    compact_json,
     format_analyses_for_synthesis,
     format_history_summary,
 )
@@ -67,13 +67,18 @@ async def analyze_game(
     game_id: str,
     matchup_str: str,
     strategy: Optional[str],
+    search_context: Optional[str] = None,
 ) -> Optional[BetRecommendation]:
     """Analyze a single game with the LLM."""
-    condensed = condense_matchup(game_data)
     home_team = game_data.get("matchup", {}).get("home_team", "Unknown")
+    search_section = f"\n## Web Search Context\n{search_context}\n\n" if search_context else "\n"
+
+    # Strip internal keys before serializing for the LLM
+    clean_data = {k: v for k, v in game_data.items() if not k.startswith("_")}
 
     prompt = ANALYZE_GAME_PROMPT.format(
-        matchup_json=json.dumps(condensed, indent=2),
+        matchup_json=compact_json(clean_data),
+        search_context=search_section,
         strategy=strategy or "No strategy defined yet.",
         game_id=game_id,
         matchup=matchup_str,
@@ -222,7 +227,7 @@ def write_journal_pre_game(
     write_text(journal_path, "\n".join(lines))
 
 
-async def run_analyze_workflow(date: str, max_bets: int = 3, force: bool = False) -> None:
+async def run_analyze_workflow(date: str, max_bets: int = 3, force: bool = False, search_mode: str = "none") -> None:
     """Run the pre-game analysis workflow."""
     # Check for existing bets on this date
     active = get_active_bets()
@@ -247,6 +252,9 @@ async def run_analyze_workflow(date: str, max_bets: int = 3, force: bool = False
     history = get_history()
 
     # Analyze games with concurrency limiting
+    if search_mode != "none":
+        print(f"Web search enrichment: strategy {search_mode.upper()}")
+        from .search import search_enrich
     print("Analyzing games...")
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_LLM_CALLS)
 
@@ -255,7 +263,12 @@ async def run_analyze_workflow(date: str, max_bets: int = 3, force: bool = False
             # Prefer api_game_id from JSON, fallback to filename-based ID for legacy files
             game_id = str(game["api_game_id"]) if game.get("api_game_id") else extract_game_id(game["_file"])
             matchup_str = format_matchup_string(game["matchup"])
-            return await analyze_game(game, game_id, matchup_str, strategy)
+
+            search_context = None
+            if search_mode != "none":
+                search_context = await search_enrich(search_mode, game, matchup_str)
+
+            return await analyze_game(game, game_id, matchup_str, strategy, search_context)
 
     tasks = [analyze_with_limit(game) for game in games]
     results = await asyncio.gather(*tasks, return_exceptions=True)

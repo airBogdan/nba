@@ -9,86 +9,9 @@ and injury impact. Be objective and data-driven. Acknowledge uncertainty.
 Never force a bet - "no edge" is a valid conclusion."""
 
 
-def condense_matchup(full_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Extract key betting-relevant data to reduce context size."""
-    team1 = full_data["current_season"]["team1"]
-    team2 = full_data["current_season"]["team2"]
-    schedule = full_data.get("schedule", {})
-    players = full_data.get("players", {})
-    h2h = full_data.get("h2h", {})
-
-    return {
-        "matchup": full_data["matchup"],
-        "records": {
-            "team1": {
-                "name": team1["name"],
-                "record": team1["record"],
-                "conf_rank": team1.get("conf_rank"),
-                "home_record": team1.get("home_record"),
-                "away_record": team1.get("away_record"),
-            },
-            "team2": {
-                "name": team2["name"],
-                "record": team2["record"],
-                "conf_rank": team2.get("conf_rank"),
-                "home_record": team2.get("home_record"),
-                "away_record": team2.get("away_record"),
-            },
-        },
-        "net_ratings": {
-            "team1": team1.get("net_rating"),
-            "team2": team2.get("net_rating"),
-        },
-        "offensive_ratings": {
-            "team1": team1.get("ortg"),
-            "team2": team2.get("ortg"),
-        },
-        "defensive_ratings": {
-            "team1": team1.get("drtg"),
-            "team2": team2.get("drtg"),
-        },
-        "recent_form": {
-            "team1": {
-                "last_ten": team1.get("last_ten"),
-                "streak": schedule.get("team1", {}).get("streak"),
-                "days_rest": schedule.get("team1", {}).get("days_rest"),
-                "games_last_7_days": schedule.get("team1", {}).get("games_last_7_days"),
-            },
-            "team2": {
-                "last_ten": team2.get("last_ten"),
-                "streak": schedule.get("team2", {}).get("streak"),
-                "days_rest": schedule.get("team2", {}).get("days_rest"),
-                "games_last_7_days": schedule.get("team2", {}).get("games_last_7_days"),
-            },
-        },
-        "recent_games": full_data.get("recent_games", {}),
-        "h2h_summary": h2h.get("summary", {}),
-        "h2h_patterns": h2h.get("patterns", {}),
-        "h2h_quarters": h2h.get("quarters", {}),  # Include quarter-by-quarter trends
-        "players": {
-            "team1": {
-                "top_scorers": players.get("team1", {}).get("top_scorers"),
-                "full_strength": players.get("team1", {}).get("full_strength"),
-                "availability_concerns": players.get("team1", {}).get(
-                    "availability_concerns", []
-                ),
-                "star_dependency": players.get("team1", {}).get("star_dependency"),
-                "bench_scoring": players.get("team1", {}).get("bench_scoring"),
-            },
-            "team2": {
-                "top_scorers": players.get("team2", {}).get("top_scorers"),
-                "full_strength": players.get("team2", {}).get("full_strength"),
-                "availability_concerns": players.get("team2", {}).get(
-                    "availability_concerns", []
-                ),
-                "star_dependency": players.get("team2", {}).get("star_dependency"),
-                "bench_scoring": players.get("team2", {}).get("bench_scoring"),
-            },
-        },
-        "totals_analysis": full_data.get("totals_analysis", {}),
-        "comparison": full_data.get("comparison", {}),
-        "signals": full_data.get("signals", []),
-    }
+def compact_json(data: Any) -> str:
+    """Serialize data to JSON with no unnecessary whitespace."""
+    return json.dumps(data, separators=(",", ":"))
 
 
 ANALYZE_GAME_PROMPT = """Analyze this NBA matchup for betting value across all bet types.
@@ -98,7 +21,7 @@ ANALYZE_GAME_PROMPT = """Analyze this NBA matchup for betting value across all b
 
 ## Matchup Data
 {matchup_json}
-
+{search_context}
 ## Current Strategy
 {strategy}
 
@@ -283,6 +206,89 @@ Write a complete updated strategy.md document with:
 - Performance Notes (current record: {wins}-{losses}, ROI: {roi}%)
 
 Be SPECIFIC. Use actual numbers from the data. Don't give generic advice."""
+
+
+SEARCH_QUERY_SYSTEM = (
+    "You identify research angles for NBA game betting analysis. "
+    "When generating a research directive, use 1-2 clear sentences describing what to investigate and why. "
+    "Not keywords. Be specific. Follow the user's instructions exactly."
+)
+
+SEARCH_QUERY_GENERATION_PROMPT = """Identify what's most important to research for this NBA game from a betting perspective.
+
+Matchup: {matchup}
+
+{search_summary}
+
+Consider what's uncertain or could move the line: injury statuses that are questionable, recent news, matchup-specific factors, coaching changes, or roster moves.
+
+Output a 1-2 sentence research directive describing what to look into and why it matters for this game. Not keywords — a clear description."""
+
+SEARCH_PERPLEXITY_WRAPPER = """Research the following for an NBA betting analysis.
+
+Game: {matchup}
+
+**Research focus:** {directive}
+
+Report your findings organized under clear headers. Include:
+- Specific facts, statuses, and numbers (not speculation)
+- Sources or timeframes for injury/news items when available
+- Any context that explains *why* something matters for this game
+
+Keep it factual and concise. Do not make predictions or betting recommendations."""
+
+SEARCH_DIRECT_PROMPT = """I need current betting-relevant information for an NBA game.
+
+{search_summary}
+
+Research and report on the following, organized under clear headers:
+
+### Injury Report
+Current injury/availability statuses for key players on both teams. Include the specific status (out, doubtful, questionable, probable) and the injury if known.
+
+### Betting Lines
+Current spread, moneyline, and over/under total from major sportsbooks.
+
+### Line Movement
+Any significant line moves from the opening lines and the likely reason (injury news, sharp action, public betting).
+
+### Recent News
+Relevant team news from the last 48 hours — trades, rotation changes, coach comments, rest decisions.
+
+Report facts only. If information is unavailable for a section, say so briefly rather than speculating."""
+
+SEARCH_TEMPLATE_PROMPT = """I need a pre-game research report for an NBA game today.
+
+**Game: {matchup}**
+
+Research and report on the following, organized under these exact headers:
+
+### Injury Report
+Current injury/availability statuses for both teams. List each player with their status (out, doubtful, questionable, probable) and injury type.
+
+### Betting Lines
+Current consensus spread, moneyline odds, and over/under total.
+
+### Line Movement
+Notable moves from opening lines. What drove the movement if known.
+
+### Recent News
+Relevant team news from the last 48 hours — roster moves, rotation changes, notable performances, rest decisions.
+
+Facts only. If a section has no relevant information, state that briefly."""
+
+SEARCH_FOLLOWUP_GENERATION_PROMPT = """Review the initial search results below and identify any important gaps for betting analysis.
+
+Matchup: {matchup}
+
+{search_summary}
+
+### Initial Search Results
+{search_results}
+
+If the results adequately cover injuries, betting lines, line movement, and recent news, respond with exactly: "No follow-up needed"
+
+Otherwise, describe in 1-2 sentences what additional information would be most valuable for betting analysis on this game and why. Be specific — not keywords, but a clear research directive."""
 
 
 def format_analyses_for_synthesis(
