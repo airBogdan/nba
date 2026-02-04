@@ -26,7 +26,7 @@ python3.13 betting.py analyze
 
 ### 3. Post-game: Process results
 ```bash
-python3.13 betting.py results --date 2026-02-02
+python3.13 betting.py results
 ```
 - Fetches final scores from API
 - Evaluates bets and updates history
