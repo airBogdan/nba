@@ -1,20 +1,6 @@
 [
   {
-    "id": "3f67954a-6325-4c7c-a46e-ca1a7fb2218f",
-    "game_id": "16254",
-    "matchup": "Denver Nuggets @ New York Knicks",
-    "bet_type": "moneyline",
-    "pick": "New York Knicks",
-    "line": null,
-    "confidence": "high",
-    "units": 2.0,
-    "reasoning": "Denver is catastrophically depleted - missing Jokic (MVP), Gordon, Watson, and Johnson removes 70+ PPG and their entire offensive identity. Knicks are 20-6 at home, on a 5-game win streak, and beat Denver 134-127 YESTERDAY with Denver's full roster. The 4-1 H2H dominance with +13.8 avg margin was achieved against healthy Denver teams.",
-    "primary_edge": "injury_edge",
-    "date": "2026-02-05",
-    "created_at": "2026-02-05T08:44:33.365185+00:00"
-  },
-  {
-    "id": "36ebec83-4922-4106-a934-16ba7cf7b143",
+    "id": "79eb1e41-82b6-4db8-99cd-02bfe327632a",
     "game_id": "16258",
     "matchup": "Oklahoma City Thunder @ San Antonio Spurs",
     "bet_type": "moneyline",
@@ -22,23 +8,43 @@
     "line": null,
     "confidence": "high",
     "units": 2.0,
-    "reasoning": "OKC missing 10 players including SGA (30.9 PPG), Holmgren, Williams, Dort, Caruso, Hartenstein, Mitchell - essentially their entire rotation. This is a G-League lineup vs Spurs at home (17-6) with Wembanyama healthy. OKC lost 88+ PPG of production from their top scorers alone.",
+    "reasoning": "OKC is catastrophically depleted - missing SGA, Holmgren, Williams, Hartenstein, Dort, Caruso, and Mitchell. This is a G-League roster on B2B after losing by 10 to this same Spurs team yesterday. Wembanyama healthy at home is a massive mismatch. Our injury_edge bets are 2-0.",
     "primary_edge": "injury_edge",
     "date": "2026-02-05",
-    "created_at": "2026-02-05T08:44:33.365260+00:00"
+    "created_at": "2026-02-05T12:24:53.487707+00:00",
+    "amount": 50.0,
+    "odds_price": -110
   },
   {
-    "id": "a6a2555e-8765-45cd-82d0-2a940e171408",
-    "game_id": "16256",
-    "matchup": "Boston Celtics @ Houston Rockets",
-    "bet_type": "total",
-    "pick": "under",
-    "line": 224.5,
+    "id": "9034f958-a22d-4288-9379-51d2296e57c5",
+    "game_id": "16254",
+    "matchup": "Denver Nuggets @ New York Knicks",
+    "bet_type": "spread",
+    "pick": "New York Knicks",
+    "line": -7.5,
     "confidence": "medium",
     "units": 1.0,
-    "reasoning": "Boston missing Jaylen Brown (28.4 PPG), Jayson Tatum, Sam Hauser, and Simons - approximately 50+ PPG of scoring gone. Both teams on B2B with fatigue. Houston's strong defense (109.1 DRTG) against a depleted Boston offense should create a low-scoring affair. Diversifies from the two moneyline injury plays.",
+    "reasoning": "Jokic OUT is catastrophic for Denver - losing 27.8 PPG, 10 APG and their entire offensive identity. Combined with Gordon/Watson/Johnson out, Nuggets fielding skeleton crew. Knicks 20-6 at home, 8-game win streak, 4-1 H2H with +13.8 avg margin.",
     "primary_edge": "injury_edge",
     "date": "2026-02-05",
-    "created_at": "2026-02-05T08:44:33.365294+00:00"
+    "created_at": "2026-02-05T12:24:53.487743+00:00",
+    "amount": 35.0,
+    "odds_price": -110
+  },
+  {
+    "id": "91f8484d-5e16-406a-b00d-7e2046ac824f",
+    "game_id": "16256",
+    "matchup": "Boston Celtics @ Houston Rockets",
+    "bet_type": "spread",
+    "pick": "Houston Rockets",
+    "line": -6.5,
+    "confidence": "medium",
+    "units": 1.0,
+    "reasoning": "Celtics decimated - missing Tatum (out), Brown (doubtful), Hauser, Simons (traded), Boucher. Houston 17-4 at home with 4th-ranked defense facing what amounts to a developmental squad. Clear personnel mismatch.",
+    "primary_edge": "injury_edge",
+    "date": "2026-02-05",
+    "created_at": "2026-02-05T12:24:53.487756+00:00",
+    "amount": 30.0,
+    "odds_price": -110
   }
 ]

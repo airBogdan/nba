@@ -1,0 +1,64 @@
+name: Daily Betting
+
+on:
+  schedule:
+    - cron: '0 12 * * *'      # fetch matchups
+    - cron: '10 12 * * *'     # analyze bets
+    - cron: '30 12 * * *'     # process results
+    - cron: '0 13 1-31/2 * *' # update strategy (odd days)
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Task to run'
+        required: true
+        type: choice
+        options:
+          - fetch
+          - analyze
+          - results
+          - update-strategy
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - run: pip install -r requirements.txt
+
+      - name: Fetch matchups
+        if: github.event.schedule == '0 12 * * *' || inputs.task == 'fetch'
+        run: python main.py $(date -u +%Y-%m-%d)
+        env:
+          NBA_RAPID_API_KEY: ${{ secrets.NBA_RAPID_API_KEY }}
+
+      - name: Analyze bets
+        if: github.event.schedule == '10 12 * * *' || inputs.task == 'analyze'
+        run: python betting.py analyze
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+      - name: Process results
+        if: github.event.schedule == '30 12 * * *' || inputs.task == 'results'
+        run: python betting.py results
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+      - name: Update strategy
+        if: github.event.schedule == '0 13 1-31/2 * *' || inputs.task == 'update-strategy'
+        run: python betting.py update-strategy
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet || git commit -m "Auto: $(date -u +%Y-%m-%d) betting workflow"
+          git pull --rebase
+          git push
