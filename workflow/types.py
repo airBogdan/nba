@@ -29,6 +29,16 @@ class TotalAnalysis(TypedDict):
     edge: str
 
 
+class RecommendedBet(TypedDict):
+    """Single bet recommendation from analysis."""
+
+    bet_type: Literal["moneyline", "spread", "total"]
+    pick: str  # Team name or "over"/"under"
+    line: Optional[float]  # null for moneyline
+    confidence: Literal["low", "medium", "high"]
+    edge: str
+
+
 class BetRecommendation(TypedDict):
     """LLM output per game - matches ANALYZE_GAME_PROMPT response."""
 
@@ -39,7 +49,7 @@ class BetRecommendation(TypedDict):
     moneyline: MoneylineAnalysis
     spread: SpreadAnalysis
     total: TotalAnalysis
-    best_bet: Literal["moneyline", "spread", "total", "none"]
+    recommended_bets: List[RecommendedBet]  # 0-3 bets from this game
     primary_edge: str
     case_for: List[str]
     case_against: List[str]

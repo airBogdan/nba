@@ -43,7 +43,7 @@ async def fetch_nba_odds(
         "apiKey": api_key,
         "regions": regions,
         "markets": markets,
-        "oddsFormat": "american",  # Get American odds (-110, +150)
+        "oddsFormat": "american"
     }
 
     timeout = aiohttp.ClientTimeout(total=10)
@@ -57,6 +57,31 @@ async def fetch_nba_odds(
                 return await response.json()
     except Exception as e:
         print(f"Odds API error: {e}")
+        return None
+
+
+async def fetch_event_alternates(event_id: str) -> Optional[Dict[str, Any]]:
+    """Fetch alternate spreads and totals for a specific event."""
+    api_key = _get_api_key()
+    if not api_key:
+        return None
+
+    url = f"{ODDS_API_URL}/sports/{SPORT}/events/{event_id}/odds"
+    params = {
+        "apiKey": api_key,
+        "regions": "us",
+        "markets": "alternate_spreads,alternate_totals",
+        "oddsFormat": "american",
+    }
+
+    timeout = aiohttp.ClientTimeout(total=10)
+    try:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(url, params=params) as response:
+                if response.status != 200:
+                    return None
+                return await response.json()
+    except Exception:
         return None
 
 
@@ -79,10 +104,51 @@ def find_game_odds(
     return None
 
 
-def extract_odds(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def _filter_alternates_near_line(
+    outcomes: List[Dict[str, Any]],
+    main_line: float,
+    team_name: Optional[str],
+    count: int = 2,
+) -> List[Dict[str, Any]]:
+    """Filter alternate outcomes to those near the main line.
+
+    Returns `count` alternates on each side of the main line.
+    For spreads: filters by team_name, returns line and price.
+    For totals: filters by Over outcomes, returns line and price.
+    """
+    if team_name:
+        # Spread: filter by team
+        relevant = [o for o in outcomes if o.get("name") == team_name]
+    else:
+        # Totals: get Over outcomes
+        relevant = [o for o in outcomes if o.get("name") == "Over"]
+
+    # Split into below and above main line, sorted by proximity to main
+    below = sorted(
+        [o for o in relevant if o.get("point", 0) < main_line],
+        key=lambda o: o.get("point", 0),
+        reverse=True,  # Highest first (closest to main)
+    )
+    above = sorted(
+        [o for o in relevant if o.get("point", 0) > main_line],
+        key=lambda o: o.get("point", 0),  # Lowest first (closest to main)
+    )
+
+    selected = below[:count] + above[:count]
+    return [{"line": o.get("point"), "price": o.get("price")} for o in selected]
+
+
+def extract_odds(
+    event: Dict[str, Any],
+    alternates: Optional[Dict[str, Any]] = None,
+) -> Optional[Dict[str, Any]]:
     """Extract structured odds from an event.
 
     Uses first available bookmaker. Returns None if no bookmakers available.
+
+    Args:
+        event: Main odds event data
+        alternates: Optional alternate lines data from fetch_event_alternates
     """
     bookmakers = event.get("bookmakers", [])
     if not bookmakers:
@@ -98,6 +164,9 @@ def extract_odds(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         "moneyline": None,
     }
 
+    main_spread_line = None
+    main_total_line = None
+
     for market in book.get("markets", []):
         key = market.get("key")
         outcomes = market.get("outcomes", [])
@@ -106,15 +175,22 @@ def extract_odds(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
             home = next((o for o in outcomes if o.get("name") == home_team), None)
             away = next((o for o in outcomes if o.get("name") == away_team), None)
             if home and away:
+                main_spread_line = home.get("point")
                 result["spread"] = {
-                    "home": home.get("point"),
-                    "away": away.get("point"),
+                    "home": {"line": home.get("point"), "price": home.get("price")},
+                    "away": {"line": away.get("point"), "price": away.get("price")},
                 }
 
         elif key == "totals":
             over = next((o for o in outcomes if o.get("name") == "Over"), None)
+            under = next((o for o in outcomes if o.get("name") == "Under"), None)
             if over:
-                result["total"] = over.get("point")
+                main_total_line = over.get("point")
+                result["total"] = {
+                    "line": over.get("point"),
+                    "over": over.get("price"),
+                    "under": under.get("price") if under else None,
+                }
 
         elif key == "h2h":
             home = next((o for o in outcomes if o.get("name") == home_team), None)
@@ -124,6 +200,28 @@ def extract_odds(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
                     "home": home.get("price"),
                     "away": away.get("price"),
                 }
+
+    # Add alternates if available
+    if alternates and alternates.get("bookmakers"):
+        alt_book = alternates["bookmakers"][0]
+        for market in alt_book.get("markets", []):
+            key = market.get("key")
+            outcomes = market.get("outcomes", [])
+
+            if key == "alternate_spreads" and main_spread_line is not None:
+                # Get alternates for home team (away is just the inverse)
+                home_alts = _filter_alternates_near_line(
+                    outcomes, main_spread_line, home_team, count=2
+                )
+                if home_alts:
+                    result["alternate_spreads"] = home_alts
+
+            elif key == "alternate_totals" and main_total_line is not None:
+                total_alts = _filter_alternates_near_line(
+                    outcomes, main_total_line, None, count=2
+                )
+                if total_alts:
+                    result["alternate_totals"] = total_alts
 
     # Return None if no useful odds were extracted
     if result["spread"] is None and result["total"] is None and result["moneyline"] is None:

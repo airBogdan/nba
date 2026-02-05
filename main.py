@@ -14,6 +14,10 @@ from helpers.api import (
     process_player_statistics,
     fetch_injuries,
     filter_injuries_by_teams,
+    fetch_nba_odds,
+    fetch_event_alternates,
+    find_game_odds,
+    extract_odds,
 )
 from helpers.teams import get_teams_standings
 from helpers.games import h2h, compute_h2h_summary, add_game_statistics_to_h2h_results
@@ -164,6 +168,14 @@ async def main() -> None:
 
     print(f"Found {len(games)} games for {game_date}")
 
+    # Fetch odds for all NBA games (single API call)
+    print("Fetching betting odds...")
+    odds_data = await fetch_nba_odds()
+    if odds_data:
+        print(f"Found odds for {len(odds_data)} events")
+    else:
+        print("No odds data available (continuing without)")
+
     # Track generated files and their teams for injury enrichment
     generated_files: list[tuple[str, str, str]] = []  # (filename, home_name, away_name)
 
@@ -183,6 +195,20 @@ async def main() -> None:
                 season=season,
                 api_game_id=game["id"],
             )
+
+            # Add odds if available
+            if odds_data:
+                event = find_game_odds(odds_data, home["name"], away["name"])
+                if event:
+                    # Fetch alternate lines for this event
+                    event_id = event.get("id")
+                    alternates = None
+                    if event_id:
+                        print("  Fetching alternate lines...")
+                        alternates = await fetch_event_alternates(event_id)
+                    odds = extract_odds(event, alternates)
+                    if odds:
+                        analysis["odds"] = odds
 
             # Filename: away_vs_home_date.json (standard "@ notation")
             away_slug = away["name"].lower().replace(" ", "_")

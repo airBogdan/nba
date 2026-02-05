@@ -25,10 +25,34 @@ ANALYZE_GAME_PROMPT = """Analyze this NBA matchup for betting value across all b
 ## Current Strategy
 {strategy}
 
+## Using the Odds Data
+The matchup data includes an "odds" object with betting lines:
+- **spread**: Main spread with line and price for home/away teams
+- **total**: Main total with line, over price, under price
+- **moneyline**: Straight-up win prices for each team
+- **alternate_spreads**: 4 alternate spread lines (2 lower, 2 higher than main) - prices shown are for HOME team
+- **alternate_totals**: 4 alternate total lines (2 lower, 2 higher than main) - prices shown are for OVER
+
+**Using alternates**: If your expected margin is close to the main line, check alternates for better value:
+- If you expect home -8 but main line is -6.5, check if home -8.5 or -9.5 alternate has good + odds
+- If you expect total of 218 but line is 224.5, the under at 220.5 alternate may offer better value
+- Note: alternate_spreads prices are for HOME team; for away bets, use the main spread or mentally flip the line
+
+**Price evaluation**: American odds context:
+- -110 is standard juice (bet $110 to win $100)
+- Positive odds (+150) mean underdog, higher = more value if you're confident
+- Large negative odds (-300+) rarely offer value unless you have very high confidence
+
 ## Bet Types to Evaluate
-1. **Moneyline**: Which team wins outright?
-2. **Spread**: Use expected_margin to determine if a team covers. Example: if you expect Team A to win by 6, they cover -4.5.
-3. **Totals**: Use expected_total and H2H patterns. Check if teams consistently go over/under in matchups.
+1. **Moneyline**: Which team wins outright? Consider the price - heavy favorites (-300+) need high confidence.
+2. **Spread**: Use expected_margin to determine if a team covers. Consider alternate lines if edge is marginal.
+3. **Totals**: Use expected_total and H2H patterns. Check alternate totals if your projection differs from the line.
+
+## Multiple Bets Per Game
+You can recommend MULTIPLE bets on the same game if independent edges exist:
+- Spread + Total often have uncorrelated edges (team wins big doesn't mean high-scoring)
+- Different alternate lines can both have value (e.g., spread AND alternate total)
+- Only combine if each bet has its own valid reasoning - don't force it
 
 ## Key Factors
 - Net rating diff >3 is significant (~3 points of expected margin)
@@ -56,17 +80,25 @@ Respond with JSON:
   }},
   "spread": {{
     "pick": "Team Name",
-    "line": -4.5,  // Negative = favorite, positive = underdog
+    "line": -4.5,  // The line you're betting (can be main or alternate)
     "confidence": "low" | "medium" | "high" | "skip",
-    "edge": "Why they cover"
+    "edge": "Why they cover at this number"
   }},
   "total": {{
     "pick": "over" | "under",
-    "line": 224.5,  // The projected total to bet against
+    "line": 224.5,  // The line you're betting (can be main or alternate)
     "confidence": "low" | "medium" | "high" | "skip",
     "edge": "Pace/defensive factors"
   }},
-  "best_bet": "moneyline" | "spread" | "total" | "none",
+  "recommended_bets": [  // Can include 0, 1, 2, or 3 bets from this game
+    {{
+      "bet_type": "spread" | "total" | "moneyline",
+      "pick": "Team Name" | "over" | "under",
+      "line": -4.5 | 224.5 | null,  // null for moneyline
+      "confidence": "low" | "medium" | "high",
+      "edge": "Specific edge for this bet"
+    }}
+  ],
   "primary_edge": "Main edge across all bet types",
   "case_for": ["reason 1", ...],
   "case_against": ["risk 1", ...],
@@ -79,6 +111,8 @@ SYNTHESIZE_BETS_PROMPT = """You have analyzed multiple games. Now select up to {
 ## Game Analyses
 {analyses_json}
 
+Each analysis includes a "recommended_bets" array - these are the analyst's pre-selected value bets from each game. Review these carefully.
+
 ## Current Strategy
 {strategy}
 
@@ -86,16 +120,22 @@ SYNTHESIZE_BETS_PROMPT = """You have analyzed multiple games. Now select up to {
 {history_summary}
 
 ## Instructions
-1. Compare edges across ALL bet types (moneyline, spread, totals) across all games
+1. Review "recommended_bets" from each game analysis - these already passed initial value screening
 2. **0 bets is perfectly acceptable** if no games have clear edges
-3. You can bet different types on the same game if edges exist (e.g., spread AND total)
+3. **Multiple bets per game is encouraged** when independent edges exist:
+   - Spread + Total often have uncorrelated outcomes
+   - A game can have value on both the side AND the total
+   - Each bet must have its own valid edge - don't bet both just because one is good
 4. Quality over quantity - don't force bets to fill the {max_bets} limit
 5. Assign units based on confidence:
    - High confidence: 2.0 units (requires strong, multi-factor edge)
    - Medium confidence: 1.0 units (clear single edge)
    - Low confidence: 0.5 units (slight edge, worth small position)
-6. **Avoid correlated bets**: Don't bet multiple moneylines on the same edge type
-7. Totals bets are often less correlated with sides - can provide diversification
+6. **Correlation awareness**:
+   - Spread + moneyline on same team = correlated (pick one)
+   - Spread + total = usually uncorrelated (can bet both)
+   - Multiple games with same edge type = consider diversifying
+7. Use the specific line from the analysis (may be alternate, not main line)
 
 Respond with JSON:
 {{

@@ -1,6 +1,6 @@
 """TypedDict definitions for NBA API responses and processed data."""
 
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 from typing_extensions import TypedDict
 
 
@@ -132,20 +132,35 @@ class Injury(TypedDict):
     report_time: str
 
 
+class OddsLine(TypedDict):
+    """A single odds line with price."""
+    line: float  # e.g., -6.5
+    price: int  # American odds, e.g., -110
+
+
 class OddsSpread(TypedDict):
     """Spread odds for a game."""
-    home: float  # e.g., -6.5
-    away: float  # e.g., +6.5
+    home: OddsLine  # e.g., {"line": -6.5, "price": -110}
+    away: OddsLine  # e.g., {"line": 6.5, "price": -110}
+
+
+class OddsTotal(TypedDict):
+    """Total (over/under) odds for a game."""
+    line: float  # e.g., 224.5
+    over: int  # American odds for over
+    under: Optional[int]  # American odds for under
 
 
 class OddsMoneyline(TypedDict):
     """Moneyline odds for a game."""
-    home: float  # e.g., -250 (American format, API returns as number)
-    away: float  # e.g., +210
+    home: int  # e.g., -250 (American format)
+    away: int  # e.g., +210
 
 
 class GameOdds(TypedDict, total=False):
     """Betting odds for a game."""
     spread: Optional[OddsSpread]
-    total: Optional[float]  # e.g., 224.5
+    total: Optional[OddsTotal]
     moneyline: Optional[OddsMoneyline]
+    alternate_spreads: Optional[List[OddsLine]]
+    alternate_totals: Optional[List[OddsLine]]
