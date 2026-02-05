@@ -130,3 +130,22 @@ class Injury(TypedDict):
     status: str  # "Out", "Questionable", "Probable", "Day-to-day"
     reason: str
     report_time: str
+
+
+class OddsSpread(TypedDict):
+    """Spread odds for a game."""
+    home: float  # e.g., -6.5
+    away: float  # e.g., +6.5
+
+
+class OddsMoneyline(TypedDict):
+    """Moneyline odds for a game."""
+    home: float  # e.g., -250 (American format, API returns as number)
+    away: float  # e.g., +210
+
+
+class GameOdds(TypedDict, total=False):
+    """Betting odds for a game."""
+    spread: Optional[OddsSpread]
+    total: Optional[float]  # e.g., 224.5
+    moneyline: Optional[OddsMoneyline]

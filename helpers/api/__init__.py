@@ -11,6 +11,9 @@ from .types import (
     GameTeams,
     ScheduledGame,
     Injury,
+    OddsSpread,
+    OddsMoneyline,
+    GameOdds,
 )
 from .client import (
     fetch_nba_api,
@@ -37,6 +40,11 @@ from .injuries import (
     fetch_injuries,
     filter_injuries_by_teams,
 )
+from .odds import (
+    fetch_nba_odds,
+    find_game_odds,
+    extract_odds,
+)
 
 __all__ = [
     # Types
@@ -50,6 +58,9 @@ __all__ = [
     "GameTeams",
     "ScheduledGame",
     "Injury",
+    "OddsSpread",
+    "OddsMoneyline",
+    "GameOdds",
     # Client
     "fetch_nba_api",
     "get_teams",
@@ -72,4 +83,8 @@ __all__ = [
     # Injuries
     "fetch_injuries",
     "filter_injuries_by_teams",
+    # Odds
+    "fetch_nba_odds",
+    "find_game_odds",
+    "extract_odds",
 ]
