@@ -1,0 +1,398 @@
+{
+  "matchup": {
+    "team1": "Sacramento Kings",
+    "team2": "LA Clippers",
+    "home_team": "Sacramento Kings"
+  },
+  "current_season": {
+    "team1": {
+      "name": "Sacramento Kings",
+      "record": "12-41",
+      "conf_rank": 15,
+      "games": 57,
+      "ppg": 110.7,
+      "opp_ppg": 119.6,
+      "ortg": 107.2,
+      "drtg": 116.8,
+      "apg": 24.9,
+      "rpg": 41.2,
+      "topg": 14.7,
+      "net_rating": -9.7,
+      "fgp": 46.7,
+      "tpp": 34.5,
+      "last_ten": "0-10",
+      "last_ten_pct": 0.0,
+      "home_record": "9-17",
+      "away_record": "3-23",
+      "home_win_pct": 0.346,
+      "away_win_pct": 0.115,
+      "pace": 102.4
+    },
+    "team2": {
+      "name": "LA Clippers",
+      "record": "24-27",
+      "conf_rank": 9,
+      "games": 54,
+      "ppg": 111.8,
+      "opp_ppg": 110.9,
+      "ortg": 111.8,
+      "drtg": 112.2,
+      "apg": 23.7,
+      "rpg": 41.0,
+      "topg": 15.0,
+      "net_rating": -0.46,
+      "fgp": 48.0,
+      "tpp": 35.9,
+      "last_ten": "6-4",
+      "last_ten_pct": 0.6,
+      "home_record": "13-11",
+      "away_record": "10-16",
+      "home_win_pct": 0.542,
+      "away_win_pct": 0.385,
+      "pace": 98.8
+    }
+  },
+  "schedule": {
+    "team1": {
+      "days_rest": 0,
+      "streak": "L5",
+      "games_last_7_days": 4,
+      "recent_opponent_avg_win_pct": 0.475,
+      "quality_wins": 0,
+      "quality_losses": 2
+    },
+    "team2": {
+      "days_rest": 0,
+      "streak": "W1",
+      "games_last_7_days": 5,
+      "recent_opponent_avg_win_pct": 0.524,
+      "quality_wins": 1,
+      "quality_losses": 3
+    }
+  },
+  "recent_games": {
+    "team1": [
+      {
+        "vs": "LA Clippers",
+        "vs_record": "24-27",
+        "vs_win_pct": 0.471,
+        "result": "L",
+        "score": "111-114",
+        "home": true,
+        "margin": -3,
+        "date": "2026-02-07"
+      },
+      {
+        "vs": "Memphis Grizzlies",
+        "vs_record": "20-30",
+        "vs_win_pct": 0.4,
+        "result": "L",
+        "score": "125-129",
+        "home": true,
+        "margin": -4,
+        "date": "2026-02-05"
+      },
+      {
+        "vs": "Washington Wizards",
+        "vs_record": "14-36",
+        "vs_win_pct": 0.28,
+        "result": "L",
+        "score": "112-116",
+        "home": false,
+        "margin": -4,
+        "date": "2026-02-01"
+      },
+      {
+        "vs": "Boston Celtics",
+        "vs_record": "34-18",
+        "vs_win_pct": 0.654,
+        "result": "L",
+        "score": "93-112",
+        "home": false,
+        "margin": -19,
+        "date": "2026-01-31"
+      },
+      {
+        "vs": "Philadelphia 76ers",
+        "vs_record": "29-22",
+        "vs_win_pct": 0.569,
+        "result": "L",
+        "score": "111-113",
+        "home": false,
+        "margin": -2,
+        "date": "2026-01-30"
+      }
+    ],
+    "team2": [
+      {
+        "vs": "Sacramento Kings",
+        "vs_record": "12-41",
+        "vs_win_pct": 0.226,
+        "result": "W",
+        "score": "114-111",
+        "home": false,
+        "margin": 3,
+        "date": "2026-02-07"
+      },
+      {
+        "vs": "Cleveland Cavaliers",
+        "vs_record": "31-21",
+        "vs_win_pct": 0.596,
+        "result": "L",
+        "score": "91-124",
+        "home": true,
+        "margin": -33,
+        "date": "2026-02-05"
+      },
+      {
+        "vs": "Philadelphia 76ers",
+        "vs_record": "29-22",
+        "vs_win_pct": 0.569,
+        "result": "L",
+        "score": "113-128",
+        "home": true,
+        "margin": -15,
+        "date": "2026-02-03"
+      },
+      {
+        "vs": "Phoenix Suns",
+        "vs_record": "31-21",
+        "vs_win_pct": 0.596,
+        "result": "W",
+        "score": "117-93",
+        "home": false,
+        "margin": 24,
+        "date": "2026-02-02"
+      },
+      {
+        "vs": "Denver Nuggets",
+        "vs_record": "33-19",
+        "vs_win_pct": 0.635,
+        "result": "L",
+        "score": "109-122",
+        "home": false,
+        "margin": -13,
+        "date": "2026-01-31"
+      }
+    ]
+  },
+  "players": {
+    "team1": {
+      "rotation": [
+        {
+          "name": "Keegan Murray",
+          "ppg": 13.9,
+          "plus_minus": -6.0,
+          "games": 21
+        },
+        {
+          "name": "DeMar DeRozan",
+          "ppg": 18.4,
+          "plus_minus": -8.1,
+          "games": 56
+        },
+        {
+          "name": "Zach LaVine",
+          "ppg": 18.9,
+          "plus_minus": -7.1,
+          "games": 43
+        },
+        {
+          "name": "Russell Westbrook",
+          "ppg": 15.2,
+          "plus_minus": -7.2,
+          "games": 50
+        },
+        {
+          "name": "Domantas Sabonis",
+          "ppg": 15.6,
+          "plus_minus": -9.5,
+          "games": 22
+        },
+        {
+          "name": "Dennis Schroder",
+          "ppg": 12.5,
+          "plus_minus": -6.4,
+          "games": 44
+        }
+      ],
+      "availability_concerns": [
+        "Keegan Murray (21/57 games)",
+        "Domantas Sabonis (22/57 games)"
+      ],
+      "full_strength": false,
+      "top_scorers": "LaVine 18.9, DeRozan 18.4, Sabonis 15.6",
+      "playmaker": "Russell Westbrook 6.6 APG",
+      "hot_hand": "Monk -2.6",
+      "star_dependency": 17.1,
+      "depth_rating": "balanced (4.2 MPG std dev)",
+      "bench_scoring": 33.9,
+      "injuries": []
+    },
+    "team2": {
+      "rotation": [
+        {
+          "name": "James Harden",
+          "ppg": 24.6,
+          "plus_minus": 0.5,
+          "games": 46
+        },
+        {
+          "name": "Kawhi Leonard",
+          "ppg": 27.1,
+          "plus_minus": 3.4,
+          "games": 40
+        },
+        {
+          "name": "Ivica Zubac",
+          "ppg": 13.8,
+          "plus_minus": -0.1,
+          "games": 46
+        },
+        {
+          "name": "John Collins",
+          "ppg": 13.6,
+          "plus_minus": 0.4,
+          "games": 51
+        },
+        {
+          "name": "Kris Dunn",
+          "ppg": 7.6,
+          "plus_minus": -0.4,
+          "games": 54
+        },
+        {
+          "name": "Derrick Jones Jr.",
+          "ppg": 10.2,
+          "plus_minus": -0.6,
+          "games": 22
+        }
+      ],
+      "availability_concerns": [
+        "Derrick Jones Jr. (22/54 games)",
+        "Bogdan Bogdanovic (18/54 games)"
+      ],
+      "full_strength": false,
+      "top_scorers": "Leonard 27.1, Harden 24.6, Zubac 13.8",
+      "playmaker": "James Harden 8.1 APG",
+      "hot_hand": "Leonard +3.4",
+      "star_dependency": 24.2,
+      "depth_rating": "balanced (4.7 MPG std dev)",
+      "bench_scoring": 24.9,
+      "injuries": []
+    }
+  },
+  "h2h": {
+    "summary": {
+      "total_games": 12,
+      "team1_wins_all_time": 2,
+      "team2_wins_all_time": 10,
+      "team1_win_pct": 0.167,
+      "team1_home_wins": 1,
+      "team1_home_losses": 5,
+      "team1_away_wins": 1,
+      "team1_away_losses": 5,
+      "avg_point_diff": -9.6,
+      "team1_avg_points": 102.2,
+      "team2_avg_points": 111.8,
+      "last_5_games": [
+        "LA Clippers",
+        "LA Clippers",
+        "LA Clippers",
+        "LA Clippers",
+        "LA Clippers"
+      ],
+      "recent_trend": "team2_hot",
+      "close_games": 3,
+      "blowouts": 6
+    },
+    "patterns": {
+      "avg_total": 214.1,
+      "home_win_pct": 0.5,
+      "high_scoring_pct": 0.42,
+      "close_game_pct": 0.25
+    },
+    "recent": {
+      "team1_wins_last_2_seasons": 0,
+      "team2_wins_last_2_seasons": 8,
+      "last_winner": "LA Clippers",
+      "home_team_home_record": "0-4",
+      "games_last_2_seasons": 8
+    },
+    "quarters": {
+      "avg_q1_total": 50.6,
+      "avg_q2_total": 53.1,
+      "avg_q3_total": 54.4,
+      "avg_q4_total": 53.8,
+      "avg_first_half": 103.7,
+      "avg_second_half": 108.2,
+      "team1_q1_avg": 23.1,
+      "team2_q1_avg": 27.5,
+      "team1_q4_avg": 26.9,
+      "team2_q4_avg": 26.8,
+      "halftime_leader_wins_pct": 0.92
+    },
+    "matchup_stats": {
+      "team1": {
+        "avg_fgp": 59.2,
+        "avg_tpp": 27.7,
+        "avg_rebounds": 44.5,
+        "avg_assists": 22.8,
+        "avg_turnovers": 13.5,
+        "avg_disruption": 10.2
+      },
+      "team2": {
+        "avg_fgp": 64.4,
+        "avg_tpp": 37.3,
+        "avg_rebounds": 41.6,
+        "avg_assists": 22.9,
+        "avg_turnovers": 13.5,
+        "avg_disruption": 12.2
+      }
+    }
+  },
+  "totals_analysis": {
+    "expected_total": 219.1,
+    "total_diff_from_h2h": 8.4,
+    "team1_h2h_scoring_diff": 8.5,
+    "team2_h2h_scoring_diff": 0.0,
+    "margin_volatility": 10.5,
+    "h2h_total_variance": 15.2,
+    "pace_adjusted_total": 110.2,
+    "defense_factor": 114.5,
+    "recent_scoring_trend": -0.7
+  },
+  "comparison": {
+    "ppg": -1.1,
+    "net_rating": -9.24,
+    "form": -0.6,
+    "turnovers": 0.3,
+    "rebounds": 0.2,
+    "fgp": -1.3,
+    "three_pt_pct": -1.4,
+    "pace": 3.6,
+    "combined_pace": 100.6
+  },
+  "signals": [
+    "Sacramento Kings playing second game today (fatigue factor)",
+    "LA Clippers playing second game today (fatigue factor)",
+    "LA Clippers missing 24% of offense with key players limited",
+    "Sacramento Kings lost 5 straight",
+    "LA Clippers starts faster (+4.4 Q1 avg in H2H)",
+    "Halftime leader wins 92% in this matchup",
+    "H2H games back-loaded (2H avg 108.2 vs 1H avg 103.7)",
+    "Sacramento Kings injury concerns: Keegan Murray (21/57 games), Domantas Sabonis (22/57 games)",
+    "LA Clippers injury concerns: Derrick Jones Jr. (22/54 games), Bogdan Bogdanovic (18/54 games)",
+    "Sacramento Kings struggling (0-10 L10)",
+    "Sacramento Kings struggling at home (9-17)",
+    "LA Clippers significantly better net rating (-9.2)",
+    "LA Clippers 8-0 in recent H2H",
+    "LA Clippers won 4+ of last 5 H2H meetings",
+    "High-variance H2H (\u00b115.2 pts std dev in totals)",
+    "Sacramento Kings FG% elevated vs LA Clippers: 59.2% H2H vs 46.7% season",
+    "LA Clippers FG% elevated vs Sacramento Kings: 64.4% H2H vs 48.0% season",
+    "Sacramento Kings cold from 3 vs LA Clippers: 27.7% H2H vs 34.5% season",
+    "Sacramento Kings dominates boards vs LA Clippers: 44.5 H2H vs 41.2 season"
+  ],
+  "api_game_id": 16274
+}
