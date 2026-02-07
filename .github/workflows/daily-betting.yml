@@ -2,10 +2,9 @@ name: Daily Betting
 
 on:
   schedule:
-    - cron: '0 12 * * *'      # fetch matchups
-    - cron: '10 12 * * *'     # analyze bets
-    - cron: '30 12 * * *'     # process results
-    - cron: '0 13 1-31/2 * *' # update strategy (odd days)
+    - cron: '0 12 * * *'      # process results
+    - cron: '10 12 * * *'     # fetch matchups
+    - cron: '20 12 * * *'     # analyze bets
   workflow_dispatch:
     inputs:
       task:
@@ -13,10 +12,12 @@ on:
         required: true
         type: choice
         options:
+          - results
           - fetch
           - analyze
-          - results
-          - update-strategy
+
+permissions:
+  contents: write
 
 jobs:
   run:
@@ -30,8 +31,14 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Process results
+        if: github.event.schedule == '0 12 * * *' || inputs.task == 'results'
+        run: python betting.py results
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
       - name: Fetch matchups
-        if: github.event.schedule == '0 12 * * *' || inputs.task == 'fetch'
+        if: github.event.schedule == '10 12 * * *' || inputs.task == 'fetch'
         run: python main.py $(date -u +%Y-%m-%d)
         env:
           NBA_RAPID_API_KEY: ${{ secrets.NBA_RAPID_API_KEY }}
@@ -39,20 +46,8 @@ jobs:
           INJURIES_API_KEY: ${{ secrets.INJURIES_API_KEY }}
 
       - name: Analyze bets
-        if: github.event.schedule == '10 12 * * *' || inputs.task == 'analyze'
+        if: github.event.schedule == '20 12 * * *' || inputs.task == 'analyze'
         run: python betting.py analyze
-        env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-
-      - name: Process results
-        if: github.event.schedule == '30 12 * * *' || inputs.task == 'results'
-        run: python betting.py results
-        env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-
-      - name: Update strategy
-        if: github.event.schedule == '0 13 1-31/2 * *' || inputs.task == 'update-strategy'
-        run: python betting.py update-strategy
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
