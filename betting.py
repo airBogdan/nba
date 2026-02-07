@@ -71,8 +71,8 @@ def main():
         else:
             dates = get_dates_from_output()
             if not dates:
-                print("Error: No matchup files found in output/. Run main.py first or specify --date.")
-                sys.exit(1)
+                print("no files in output dir")
+                sys.exit(0)
             print(f"Found matchups for: {', '.join(dates)}")
 
         from workflow.analyze import run_analyze_workflow
