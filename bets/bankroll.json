@@ -1,6 +1,6 @@
 {
   "starting": 1000.0,
-  "current": 859.5454545454546,
+  "current": 739.5454545454546,
   "transactions": [
     {
       "date": "2026-02-05",
@@ -92,6 +92,27 @@
       "amount": 47.72727272727273,
       "bet_id": "dc8000ab-5297-4326-9912-c0ee0e7a1fb3",
       "description": "WIN: Brooklyn Nets @ Orlando Magic (+$22.73)"
+    },
+    {
+      "date": "2026-02-07",
+      "type": "bet",
+      "amount": -35.0,
+      "bet_id": "f24727aa-1e65-4b67-a481-7447991003af",
+      "description": "New York Knicks @ Detroit Pistons - spread Detroit Pistons"
+    },
+    {
+      "date": "2026-02-07",
+      "type": "bet",
+      "amount": -45.0,
+      "bet_id": "0b371a93-224a-4554-b40a-4a7658850410",
+      "description": "Houston Rockets @ Oklahoma City Thunder - spread Houston Rockets"
+    },
+    {
+      "date": "2026-02-07",
+      "type": "bet",
+      "amount": -40.0,
+      "bet_id": "a7880b50-ab6a-4681-bfca-9bdd0f1c51d5",
+      "description": "Houston Rockets @ Oklahoma City Thunder - total under"
     }
   ]
 }

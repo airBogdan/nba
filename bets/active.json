@@ -1,1 +1,50 @@
-[]
+[
+  {
+    "id": "f24727aa-1e65-4b67-a481-7447991003af",
+    "game_id": "16270",
+    "matchup": "New York Knicks @ Detroit Pistons",
+    "bet_type": "spread",
+    "pick": "Detroit Pistons",
+    "line": -6.5,
+    "confidence": "medium",
+    "units": 1.0,
+    "reasoning": "Knicks catastrophically injured - KAT out/doubtful, McBride out, Anunoby questionable (potentially 48+ PPG compromised). Detroit 20-6 at home (76.9% win rate) and just demolished NYK by 38 yesterday. Even with B2B fatigue for both, the talent disparity is massive.",
+    "primary_edge": "injury_edge",
+    "date": "2026-02-07",
+    "created_at": "2026-02-07T13:12:28.943077+00:00",
+    "amount": 35.0,
+    "odds_price": -110
+  },
+  {
+    "id": "0b371a93-224a-4554-b40a-4a7658850410",
+    "game_id": "16276",
+    "matchup": "Houston Rockets @ Oklahoma City Thunder",
+    "bet_type": "spread",
+    "pick": "Houston Rockets",
+    "line": 2.5,
+    "confidence": "medium",
+    "units": 1.0,
+    "reasoning": "OKC missing SGA (31 PPG MVP candidate), Williams, Holmgren, Dort, and Mitchell - essentially their entire core. Houston has Durant and Sengun healthy. Thunder's elite 22-4 home record built with full roster is irrelevant against this skeleton crew.",
+    "primary_edge": "injury_edge",
+    "date": "2026-02-07",
+    "created_at": "2026-02-07T13:12:28.943108+00:00",
+    "amount": 45.0,
+    "odds_price": -110
+  },
+  {
+    "id": "a7880b50-ab6a-4681-bfca-9bdd0f1c51d5",
+    "game_id": "16276",
+    "matchup": "Houston Rockets @ Oklahoma City Thunder",
+    "bet_type": "total",
+    "pick": "under",
+    "line": 212.5,
+    "confidence": "medium",
+    "units": 1.0,
+    "reasoning": "OKC lost ~50 PPG of production to injuries. Houston averaging just 96 PPG last 2 games. Both teams in offensive slumps with slower pace expected from OKC's makeshift lineup. Line adjusted down but not enough given the magnitude of missing firepower.",
+    "primary_edge": "injury_edge",
+    "date": "2026-02-07",
+    "created_at": "2026-02-07T13:12:28.943122+00:00",
+    "amount": 40.0,
+    "odds_price": -110
+  }
+]
