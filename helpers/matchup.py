@@ -189,7 +189,11 @@ class TeamSchedule(TypedDict):
 
 
 class TotalsAnalysis(TypedDict):
-    """Totals/Over-Under analysis."""
+    """Totals/Over-Under analysis.
+
+    Note: `injury_adjusted_total` may be added post-generation by the betting
+    workflow (workflow/analyze.py) when injury data is available.
+    """
     expected_total: float
     total_diff_from_h2h: float
     team1_h2h_scoring_diff: float

@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import re
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,6 +23,7 @@ from .io import (
 from .llm import complete_json
 from .prompts import (
     ANALYZE_GAME_PROMPT,
+    EXTRACT_INJURIES_PROMPT,
     NO_ODDS_SECTION,
     ODDS_CONTEXT_SECTION,
     SIZING_PROMPT,
@@ -38,6 +40,125 @@ from .types import ActiveBet, Bankroll, BetRecommendation, SelectedBet
 CONFIDENCE_WIN_PROB = {"high": 0.65, "medium": 0.57, "low": 0.54}
 KELLY_FRACTION = 0.5
 KELLY_MAX_BET_FRACTION = 0.03  # 3% of bankroll per bet
+
+# Injury impact parameters
+INJURY_REPLACEMENT_FACTOR = 0.55  # Replacement players recover ~55% of missing PPG
+HAIKU_MODEL = "anthropic/claude-haiku-4.5"
+
+# Name normalization
+_SUFFIXES = re.compile(r"\s+(jr\.?|sr\.?|ii|iii|iv)$", re.IGNORECASE)
+
+
+def _normalize_name(name: str) -> str:
+    """Normalize a player name for comparison."""
+    name = name.strip().lower()
+    name = _SUFFIXES.sub("", name)
+    # Remove periods (e.g., "P.J." → "pj")
+    name = name.replace(".", "")
+    return name
+
+
+def _names_match(name_a: str, name_b: str) -> bool:
+    """Check if two player names refer to the same person.
+
+    Handles: exact match, suffix stripping, initial matching (e.g., "C. Coward" → "Cedric Coward").
+    """
+    a = _normalize_name(name_a)
+    b = _normalize_name(name_b)
+    if a == b:
+        return True
+
+    # Initial matching: "k knueppel" matches "kyle knueppel"
+    parts_a = a.split()
+    parts_b = b.split()
+    if len(parts_a) >= 2 and len(parts_b) >= 2 and parts_a[-1] == parts_b[-1]:
+        # Last names match — check if first name is an initial
+        if len(parts_a[0]) == 1 and parts_b[0].startswith(parts_a[0]):
+            return True
+        if len(parts_b[0]) == 1 and parts_a[0].startswith(parts_b[0]):
+            return True
+    return False
+
+
+async def _extract_injuries_from_search(
+    search_context: str, team1: str, team2: str
+) -> List[Dict[str, str]]:
+    """Extract structured injury data from search context using Haiku."""
+    prompt = EXTRACT_INJURIES_PROMPT.format(
+        team1=team1, team2=team2, search_context=search_context
+    )
+    result = await complete_json(prompt, model=HAIKU_MODEL, temperature=0.0)
+    if not isinstance(result, list):
+        return []
+    # Validate entries
+    valid = []
+    for entry in result:
+        if (
+            isinstance(entry, dict)
+            and entry.get("player")
+            and entry.get("team")
+            and entry.get("status") in ("Out", "Doubtful")
+        ):
+            valid.append(entry)
+    return valid
+
+
+def compute_injury_impact(
+    extracted_injuries: List[Dict[str, str]],
+    team1_name: str,
+    team2_name: str,
+    team1_rotation: List[Dict[str, Any]],
+    team2_rotation: List[Dict[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    """Compute injury impact by cross-referencing extracted injuries with rotation.
+
+    Returns None if no matched out players.
+    """
+    def _team_matches(inj_team: str, team_name: str) -> bool:
+        a = inj_team.lower().strip()
+        b = team_name.lower().strip()
+        return a == b or a in b or b in a
+
+    def _match_team(injuries, team_name, rotation):
+        out_players = []
+        for inj in injuries:
+            if not _team_matches(inj["team"], team_name):
+                continue
+            for player in rotation:
+                if _names_match(inj["player"], player["name"]):
+                    out_players.append({
+                        "name": player["name"],
+                        "ppg": player["ppg"],
+                        "status": inj["status"],
+                    })
+                    break
+        return out_players
+
+    t1_out = _match_team(extracted_injuries, team1_name, team1_rotation)
+    t2_out = _match_team(extracted_injuries, team2_name, team2_rotation)
+
+    if not t1_out and not t2_out:
+        return None
+
+    t1_missing = sum(p["ppg"] for p in t1_out)
+    t2_missing = sum(p["ppg"] for p in t2_out)
+    t1_adj_loss = round(t1_missing * (1 - INJURY_REPLACEMENT_FACTOR), 1)
+    t2_adj_loss = round(t2_missing * (1 - INJURY_REPLACEMENT_FACTOR), 1)
+
+    return {
+        "team1": {
+            "out_players": t1_out,
+            "missing_ppg": round(t1_missing, 1),
+            "adjusted_ppg_loss": t1_adj_loss,
+        },
+        "team2": {
+            "out_players": t2_out,
+            "missing_ppg": round(t2_missing, 1),
+            "adjusted_ppg_loss": t2_adj_loss,
+        },
+        "total_reduction": round(t1_adj_loss + t2_adj_loss, 1),
+        "missing_ppg_diff": round(t2_adj_loss - t1_adj_loss, 1),
+    }
 
 
 def _american_odds_to_decimal(odds: int) -> float:
@@ -124,6 +245,70 @@ async def _enrich_games_with_search(games: List[Dict[str, Any]], date: str) -> N
     for r in results:
         if isinstance(r, Exception):
             print(f"Search enrichment error: {r}")
+
+
+async def _extract_and_compute_injuries(games: List[Dict[str, Any]]) -> None:
+    """Extract injuries from search context and compute impact for each game."""
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_LLM_CALLS)
+
+    async def process_one(game: Dict[str, Any]) -> None:
+        matchup = game.get("matchup", {})
+        team1 = matchup.get("team1", "")
+        team2 = matchup.get("team2", "")
+        if not team1 or not team2:
+            return
+
+        # Extract from search context via Haiku
+        search_context = game.get("search_context")
+        extracted: List[Dict[str, str]] = []
+        if search_context:
+            async with semaphore:
+                extracted = await _extract_injuries_from_search(search_context, team1, team2)
+
+        # Merge with API injuries data (deduplicate by player name)
+        seen_players = {_normalize_name(e["player"]) for e in extracted}
+        for team_key, team_name in [("team1", team1), ("team2", team2)]:
+            api_injuries = game.get("players", {}).get(team_key, {}).get("injuries", [])
+            for inj in api_injuries:
+                if inj.get("status") not in ("Out", "Doubtful"):
+                    continue
+                norm = _normalize_name(inj.get("player", ""))
+                if norm and norm not in seen_players:
+                    extracted.append({
+                        "team": team_name,
+                        "player": inj["player"],
+                        "status": inj["status"],
+                    })
+                    seen_players.add(norm)
+
+        if not extracted:
+            return
+
+        team1_rotation = game.get("players", {}).get("team1", {}).get("rotation", [])
+        team2_rotation = game.get("players", {}).get("team2", {}).get("rotation", [])
+
+        impact = compute_injury_impact(extracted, team1, team2, team1_rotation, team2_rotation)
+        if impact:
+            game["injury_impact"] = impact
+            # Add injury_adjusted_total to totals_analysis
+            totals = game.get("totals_analysis", {})
+            expected_total = totals.get("expected_total")
+            if expected_total is not None:
+                game.setdefault("totals_analysis", {})["injury_adjusted_total"] = round(
+                    expected_total - impact["total_reduction"], 1
+                )
+            _save_game_file(game)
+            t1_loss = impact["team1"]["adjusted_ppg_loss"]
+            t2_loss = impact["team2"]["adjusted_ppg_loss"]
+            matchup_str = format_matchup_string(matchup)
+            print(f"  {matchup_str}: injury impact -{impact['total_reduction']} pts "
+                  f"({team1} -{t1_loss}, {team2} -{t2_loss})")
+
+    tasks = [process_one(game) for game in games]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    for r in results:
+        if isinstance(r, Exception):
+            print(f"Injury extraction error: {r}")
 
 
 async def analyze_game(
@@ -461,6 +646,10 @@ async def run_analyze_workflow(date: str, max_bets: int = 3, force: bool = False
     # Phase 1: Web search enrichment (saves results into game JSON files)
     print("Running web search enrichment...")
     await _enrich_games_with_search(games, date)
+
+    # Phase 1.5: Extract injuries from search and compute impact
+    print("Computing injury impact...")
+    await _extract_and_compute_injuries(games)
 
     # Load context
     strategy = read_text(BETS_DIR / "strategy.md")

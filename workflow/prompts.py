@@ -76,6 +76,7 @@ You can recommend MULTIPLE bets on the same game if independent edges exist:
 - Rest advantage (2+ days vs B2B) worth ~3 points
 - H2H totals patterns: check avg_total in h2h_patterns
 - Pace comparison affects totals (high pace = more possessions = more points)
+- **IMPORTANT**: All season stats (PPG, net rating, expected_total) are FULL-STRENGTH numbers. They do NOT reflect tonight's injuries. Use `injury_impact` data when available to adjust projections. If `injury_impact` is missing but search context mentions injuries, manually estimate the impact.
 
 ## Confidence Thresholds
 - High: 5+ point edge equivalent AND multiple factors align
@@ -85,8 +86,8 @@ You can recommend MULTIPLE bets on the same game if independent edges exist:
 
 ## Required Analysis Steps
 Before making picks, work through these calculations explicitly:
-1. **Expected Margin**: Start with net_rating_diff / 2, add home_court (+3), add rest_adj, add injury_adj → your expected margin
-2. **Expected Total**: Start with team1_ppg + team2_ppg, adjust for pace, adjust for H2H avg_total → your projected total
+1. **Expected Margin**: Start with net_rating_diff / 2, add home_court (+3), add rest_adj, add injury_adj (use `injury_impact.missing_ppg_diff` when available) → your expected margin
+2. **Expected Total**: Use `injury_adjusted_total` from totals_analysis if available (already accounts for injuries). Otherwise start with expected_total and manually subtract estimated injury PPG loss from search context.
 3. **Edge Check**: For each bet type, state "My projection: X, Line: Y, Edge: Z" before assigning confidence
 
 Respond with JSON:
@@ -282,6 +283,23 @@ Write a complete updated strategy.md document with:
 - Performance Notes (current record: {wins}-{losses}, ROI: {roi}%)
 
 Be SPECIFIC. Use actual numbers from the data. Don't give generic advice."""
+
+
+EXTRACT_INJURIES_PROMPT = """Extract injured/out players from this pre-game report.
+
+## Teams
+Team 1: {team1}
+Team 2: {team2}
+
+## Report
+{search_context}
+
+## Instructions
+Return a JSON array of players who are **Out** or **Doubtful** only. Skip Questionable/Probable/Available.
+Each entry: {{"team": "Full Team Name", "player": "Player Name", "status": "Out" or "Doubtful"}}
+If no players are out/doubtful, return an empty array: []
+
+Respond with only the JSON array, no other text."""
 
 
 SEARCH_QUERY_SYSTEM = (
