@@ -38,6 +38,8 @@ The matchup data includes an "odds" object with betting lines:
 - -110 is standard juice (bet $110 to win $100)
 - Positive odds (+150) mean underdog, higher = more value if you're confident
 - Large negative odds (-300+) rarely offer value unless you have very high confidence
+
+**Line discrepancies**: If the web search context shows different lines than the matchup data odds, prefer the web search lines — they are more current. The API odds may be hours old. Do not skip a game just because lines differ between sources.
 """
 
 NO_ODDS_SECTION = """
@@ -163,7 +165,7 @@ Each analysis includes a "recommended_bets" array - these are the analyst's pre-
    - Spread + total = usually uncorrelated (can bet both)
    - Multiple games with same edge type = consider diversifying
 7. Use the specific line from the analysis (may be alternate, not main line)
-8. **Spread caution**: Our spread record is 1-2 (33%). Only include spreads when the analyst's expected margin exceeds the line by 5+ points.
+8. Use expected_margin to evaluate spread bets - look for meaningful edges where the margin clearly exceeds the line.
 
 Respond with JSON:
 {{
@@ -346,7 +348,9 @@ SYSTEM_SIZING = """You are an expert betting bankroll manager. Your job is to:
 1. Review proposed bets and validate the reasoning
 2. Assign appropriate dollar amounts based on edge strength and bankroll management
 3. Veto bets with weak reasoning (assign $0)
-You have full discretion. Learn from results over time."""
+You have full discretion. Learn from results over time.
+
+IMPORTANT: The roster/player data comes from a live API and reflects current rosters including recent trades. Trades happen frequently and your training data may be outdated."""
 
 
 SIZING_PROMPT = """Review these proposed bets and assign dollar amounts.
