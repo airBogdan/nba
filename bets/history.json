@@ -341,21 +341,115 @@
       "actual_margin": 20,
       "profit_loss": 1.0,
       "reflection": "The injury edge and fatigue factors played out exactly as expected - Nets scored just 98 points with their depleted roster, and the 216 total came in comfortably under our 218.7 line. Process was solid with multiple converging factors supporting the under."
+    },
+    {
+      "id": "f24727aa-1e65-4b67-a481-7447991003af",
+      "game_id": "16270",
+      "matchup": "New York Knicks @ Detroit Pistons",
+      "bet_type": "spread",
+      "pick": "Detroit Pistons",
+      "line": -6.5,
+      "confidence": "medium",
+      "units": 1.0,
+      "reasoning": "Knicks catastrophically injured - KAT out/doubtful, McBride out, Anunoby questionable (potentially 48+ PPG compromised). Detroit 20-6 at home (76.9% win rate) and just demolished NYK by 38 yesterday. Even with B2B fatigue for both, the talent disparity is massive.",
+      "primary_edge": "injury_edge",
+      "date": "2026-02-07",
+      "created_at": "2026-02-07T13:12:28.943077+00:00",
+      "amount": 35.0,
+      "odds_price": -110,
+      "result": "win",
+      "winner": "Detroit Pistons",
+      "final_score": "New York Knicks 80 @ Detroit Pistons 118",
+      "actual_total": 198,
+      "actual_margin": 38,
+      "profit_loss": 1.0,
+      "reflection": "The injury edge was perfectly identified - Knicks missing 48+ PPG of production against a red-hot home team resulted in an identical 38-point blowout. Process was sound; the line should have been larger given the circumstances.",
+      "structured_reflection": {
+        "edge_valid": true,
+        "missed_factors": [],
+        "process_assessment": "sound",
+        "key_lesson": "Catastrophic injury situations combined with strong home team form and recent blowout momentum create reliable edges worth betting.",
+        "summary": "The injury edge was perfectly identified - Knicks missing 48+ PPG of production against a red-hot home team resulted in an identical 38-point blowout. Process was sound; the line should have been larger given the circumstances."
+      }
+    },
+    {
+      "id": "0b371a93-224a-4554-b40a-4a7658850410",
+      "game_id": "16276",
+      "matchup": "Houston Rockets @ Oklahoma City Thunder",
+      "bet_type": "spread",
+      "pick": "Houston Rockets",
+      "line": 2.5,
+      "confidence": "medium",
+      "units": 1.0,
+      "reasoning": "OKC missing SGA (31 PPG MVP candidate), Williams, Holmgren, Dort, and Mitchell - essentially their entire core. Houston has Durant and Sengun healthy. Thunder's elite 22-4 home record built with full roster is irrelevant against this skeleton crew.",
+      "primary_edge": "injury_edge",
+      "date": "2026-02-07",
+      "created_at": "2026-02-07T13:12:28.943108+00:00",
+      "amount": 45.0,
+      "odds_price": -110,
+      "result": "win",
+      "winner": "Houston Rockets",
+      "final_score": "Houston Rockets 112 @ Oklahoma City Thunder 106",
+      "actual_total": 218,
+      "actual_margin": -6,
+      "profit_loss": 1.0,
+      "reflection": "The injury edge was correctly identified and sized appropriately. OKC's skeleton crew couldn't compensate for missing SGA, Holmgren, Williams, Dort, and Mitchell - Houston won outright by 6, covering comfortably.",
+      "structured_reflection": {
+        "edge_valid": true,
+        "missed_factors": [],
+        "process_assessment": "sound",
+        "key_lesson": "When a team is missing 5+ rotation players including their MVP candidate, the line adjustment is rarely enough - trust the injury edge.",
+        "summary": "The injury edge was correctly identified and sized appropriately. OKC's skeleton crew couldn't compensate for missing SGA, Holmgren, Williams, Dort, and Mitchell - Houston won outright by 6, covering comfortably."
+      }
+    },
+    {
+      "id": "a7880b50-ab6a-4681-bfca-9bdd0f1c51d5",
+      "game_id": "16276",
+      "matchup": "Houston Rockets @ Oklahoma City Thunder",
+      "bet_type": "total",
+      "pick": "under",
+      "line": 212.5,
+      "confidence": "medium",
+      "units": 1.0,
+      "reasoning": "OKC lost ~50 PPG of production to injuries. Houston averaging just 96 PPG last 2 games. Both teams in offensive slumps with slower pace expected from OKC's makeshift lineup. Line adjusted down but not enough given the magnitude of missing firepower.",
+      "primary_edge": "injury_edge",
+      "date": "2026-02-07",
+      "created_at": "2026-02-07T13:12:28.943122+00:00",
+      "amount": 40.0,
+      "odds_price": -110,
+      "result": "loss",
+      "winner": "Houston Rockets",
+      "final_score": "Houston Rockets 112 @ Oklahoma City Thunder 106",
+      "actual_total": 218,
+      "actual_margin": -6,
+      "profit_loss": -1.0,
+      "reflection": "The injury edge was real but we underestimated how both teams would respond - Houston found their offense (112 pts) and OKC pushed pace rather than grinding. At 218 vs 212.5, this was a 5.5 point miss that could have easily gone our way with slightly different game flow.",
+      "structured_reflection": {
+        "edge_valid": true,
+        "missed_factors": [
+          "Houston's offensive rebound/second chance points capability",
+          "OKC's remaining players stepping up scoring (Dort, Williams, etc.)",
+          "Pace actually increased as OKC pushed tempo to compensate for talent gap"
+        ],
+        "process_assessment": "unlucky",
+        "key_lesson": "Injury-depleted teams sometimes play faster/looser rather than slower, which can inflate totals despite lower efficiency.",
+        "summary": "The injury edge was real but we underestimated how both teams would respond - Houston found their offense (112 pts) and OKC pushed pace rather than grinding. At 218 vs 212.5, this was a 5.5 point miss that could have easily gone our way with slightly different game flow."
+      }
     }
   ],
   "summary": {
-    "total_bets": 16,
-    "wins": 12,
-    "losses": 4,
+    "total_bets": 19,
+    "wins": 14,
+    "losses": 5,
     "pushes": 0,
-    "win_rate": 0.75,
-    "total_units_wagered": 21.5,
-    "net_units": 11.5,
-    "roi": 0.535,
+    "win_rate": 0.737,
+    "total_units_wagered": 24.5,
+    "net_units": 12.5,
+    "roi": 0.51,
     "by_confidence": {
       "medium": {
-        "wins": 6,
-        "losses": 3,
+        "wins": 8,
+        "losses": 4,
         "win_rate": 0.667
       },
       "low": {
@@ -386,8 +480,8 @@
         "win_rate": 1.0
       },
       "injury_edge": {
-        "wins": 4,
-        "losses": 2,
+        "wins": 6,
+        "losses": 3,
         "win_rate": 0.667
       }
     },
@@ -398,16 +492,16 @@
         "win_rate": 0.8
       },
       "spread": {
-        "wins": 1,
+        "wins": 3,
         "losses": 2,
-        "win_rate": 0.333
+        "win_rate": 0.6
       },
       "total": {
         "wins": 3,
-        "losses": 0,
-        "win_rate": 1.0
+        "losses": 1,
+        "win_rate": 0.75
       }
     },
-    "current_streak": "W3"
+    "current_streak": "L1"
   }
 }
