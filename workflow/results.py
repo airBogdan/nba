@@ -575,8 +575,16 @@ async def _process_results_for_date(date: str, season: int) -> None:
         # Create completed bets
         for (bet, result, outcome, profit_loss), reflection in zip(matched, reflections):
             reflection_text = ""
+            structured_ref = None
             if reflection and not isinstance(reflection, Exception):
                 reflection_text = reflection.get("summary", "")
+                structured_ref = {
+                    "edge_valid": reflection.get("edge_valid", True),
+                    "missed_factors": reflection.get("missed_factors", []),
+                    "process_assessment": reflection.get("process_assessment", "sound"),
+                    "key_lesson": reflection.get("key_lesson", ""),
+                    "summary": reflection_text,
+                }
 
             actual_total = result["home_score"] + result["away_score"]
             actual_margin = result["home_score"] - result["away_score"]  # Positive = home win
@@ -591,6 +599,8 @@ async def _process_results_for_date(date: str, season: int) -> None:
                 "profit_loss": profit_loss,
                 "reflection": reflection_text,
             }
+            if structured_ref:
+                completed_bet["structured_reflection"] = structured_ref
             completed.append(completed_bet)
             history = update_history_with_bet(history, completed_bet)
 

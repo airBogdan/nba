@@ -35,6 +35,7 @@ from .processors import (
     process_team_stats,
     get_all_standings,
     get_team_statistics_for_seasons,
+    compute_league_avg_efficiency,
     get_team_recent_games,
     get_scheduled_games,
 )
@@ -83,6 +84,7 @@ __all__ = [
     "process_team_stats",
     "get_all_standings",
     "get_team_statistics_for_seasons",
+    "compute_league_avg_efficiency",
     "get_team_recent_games",
     "get_scheduled_games",
     # Injuries

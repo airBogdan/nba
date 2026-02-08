@@ -22,6 +22,8 @@ from .io import (
 from .llm import complete_json
 from .prompts import (
     ANALYZE_GAME_PROMPT,
+    NO_ODDS_SECTION,
+    ODDS_CONTEXT_SECTION,
     SIZING_PROMPT,
     SYNTHESIZE_BETS_PROMPT,
     SYSTEM_ANALYST,
@@ -31,6 +33,32 @@ from .prompts import (
     format_history_summary,
 )
 from .types import ActiveBet, Bankroll, BetRecommendation, SelectedBet
+
+# Kelly Criterion parameters
+CONFIDENCE_WIN_PROB = {"high": 0.65, "medium": 0.57, "low": 0.54}
+KELLY_FRACTION = 0.5
+KELLY_MAX_BET_FRACTION = 0.03  # 3% of bankroll per bet
+
+
+def _american_odds_to_decimal(odds: int) -> float:
+    """Convert American odds to decimal odds (payout per $1 wagered)."""
+    if odds < 0:
+        return 1 + 100 / abs(odds)
+    return 1 + odds / 100
+
+
+def _half_kelly_amount(odds_price: int, confidence: str, bankroll: float) -> float:
+    """Compute Half Kelly bet amount. Returns 0 if no edge."""
+    p = CONFIDENCE_WIN_PROB.get(confidence, 0.54)
+    decimal_odds = _american_odds_to_decimal(odds_price)
+    b = decimal_odds - 1
+    if b <= 0:
+        return 0.0
+    kelly = (b * p - (1 - p)) / b
+    if kelly <= 0:
+        return 0.0
+    fraction = min(kelly * KELLY_FRACTION, KELLY_MAX_BET_FRACTION)
+    return round(fraction * bankroll, 2)
 
 # Limit concurrent LLM calls to avoid rate limiting
 MAX_CONCURRENT_LLM_CALLS = 4
@@ -114,6 +142,10 @@ async def analyze_game(
     # is injected as its own prompt section, not buried in the JSON blob)
     clean_data = {k: v for k, v in game_data.items() if not k.startswith("_") and not k.startswith("search_context")}
 
+    # Conditional odds context
+    has_odds = "odds" in clean_data and clean_data["odds"]
+    odds_context = ODDS_CONTEXT_SECTION if has_odds else NO_ODDS_SECTION
+
     prompt = ANALYZE_GAME_PROMPT.format(
         matchup_json=compact_json(clean_data),
         search_context=search_section,
@@ -121,6 +153,7 @@ async def analyze_game(
         game_id=game_id,
         matchup=matchup_str,
         home_team=home_team,
+        odds_context=odds_context,
     )
 
     result = await complete_json(prompt, system=SYSTEM_ANALYST)
@@ -224,24 +257,39 @@ def _extract_sizing_strategy(strategy: Optional[str]) -> str:
     return "No sizing strategy defined yet."
 
 
-def _get_odds_price(bet: ActiveBet) -> int:
-    """Get American odds price for a bet. Default to -110 for spread/total."""
-    # TODO: Could enhance to pull from stored odds data
-    # For now, use -110 as standard juice for spread/total
-    if bet["bet_type"] in ("spread", "total"):
+def _extract_odds_price(game_data: Dict, bet: ActiveBet) -> int:
+    """Extract real odds price from game data for a bet."""
+    odds = game_data.get("odds")
+    if not odds:
         return -110
-    # Moneyline: would need to look up from game data
-    # For now default to -110 (conservative)
+
+    # Determine if pick is home or away from matchup string "Away @ Home"
+    parts = bet["matchup"].split(" @ ")
+    home_team = parts[1] if len(parts) == 2 else ""
+    is_home_pick = (bet["pick"] == home_team)
+
+    if bet["bet_type"] == "moneyline" and odds.get("moneyline"):
+        return odds["moneyline"].get("home" if is_home_pick else "away") or -110
+    elif bet["bet_type"] == "spread" and odds.get("spread"):
+        side = odds["spread"].get("home" if is_home_pick else "away")
+        return side.get("price", -110) if side else -110
+    elif bet["bet_type"] == "total" and odds.get("total"):
+        return odds["total"].get("over" if bet["pick"].lower() == "over" else "under", -110) or -110
     return -110
 
 
-def _fallback_sizing(bets: List[ActiveBet], bankroll: Bankroll) -> List[ActiveBet]:
-    """Fallback sizing based on units if LLM fails."""
-    unit_value = bankroll["current"] * 0.01  # 1% per unit
+
+def _fallback_sizing(bets: List[ActiveBet], available: float) -> List[ActiveBet]:
+    """Fallback sizing using Half Kelly Criterion."""
+    sized = []
     for bet in bets:
-        bet["amount"] = round(bet["units"] * unit_value, 2)
-        bet["odds_price"] = _get_odds_price(bet)
-    return bets
+        amount = _half_kelly_amount(
+            bet.get("odds_price", -110), bet["confidence"], available
+        )
+        if amount > 0:
+            bet["amount"] = amount
+            sized.append(bet)
+    return sized
 
 
 async def size_bets(
@@ -272,6 +320,10 @@ async def size_bets(
                     "units": b["units"],
                     "reasoning": b["reasoning"],
                     "primary_edge": b["primary_edge"],
+                    "odds_price": b.get("odds_price", -110),
+                    "kelly_recommended": _half_kelly_amount(
+                        b.get("odds_price", -110), b["confidence"], available
+                    ),
                 }
                 for b in proposed_bets
             ],
@@ -283,8 +335,8 @@ async def size_bets(
 
     result = await complete_json(prompt, system=SYSTEM_SIZING)
     if not result:
-        # Fallback: use unit-based sizing
-        return _fallback_sizing(proposed_bets, bankroll), []
+        # Fallback: use Half Kelly sizing
+        return _fallback_sizing(proposed_bets, available), []
 
     # Apply sizing decisions
     sized_bets = []
@@ -294,8 +346,13 @@ async def size_bets(
     for bet in proposed_bets:
         decision = decisions.get(bet["id"])
         if decision and decision.get("action") == "place" and decision.get("amount", 0) > 0:
-            bet["amount"] = round(decision["amount"], 2)
-            bet["odds_price"] = _get_odds_price(bet)
+            kelly_max = _half_kelly_amount(
+                bet.get("odds_price", -110), bet["confidence"], available
+            )
+            if kelly_max <= 0:
+                skipped.append({"matchup": bet["matchup"], "reason": "Kelly: no edge at these odds"})
+                continue
+            bet["amount"] = min(round(decision["amount"], 2), round(kelly_max * 1.2, 2))
             sized_bets.append(bet)
         else:
             reason = decision.get("reasoning", "No reasoning") if decision else "No sizing decision"
@@ -450,6 +507,15 @@ async def run_analyze_workflow(date: str, max_bets: int = 3, force: bool = False
     selected = synthesis.get("selected_bets", [])
     valid_bets = [s for s in selected if s.get("pick") and s.get("matchup")]
     new_bets = [create_active_bet(s, date) for s in valid_bets]
+
+    # Build game lookup and set real odds_price on bets
+    game_lookup: Dict[str, Dict[str, Any]] = {}
+    for game in games:
+        gid = str(game["api_game_id"]) if game.get("api_game_id") else extract_game_id(game["_file"])
+        game_lookup[gid] = game
+
+    for bet in new_bets:
+        bet["odds_price"] = _extract_odds_price(game_lookup.get(bet["game_id"], {}), bet)
 
     if not new_bets:
         print("No bets selected by analysis.")

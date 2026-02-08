@@ -11,6 +11,7 @@ from helpers.api import (
     get_team_players_statistics,
     get_team_recent_games,
     get_all_standings,
+    compute_league_avg_efficiency,
     process_player_statistics,
     fetch_injuries,
     filter_injuries_by_teams,
@@ -101,6 +102,7 @@ async def analyze_game(
     game_date: str,
     season: int,
     api_game_id: int,
+    league_avg_efficiency: float = 113.5,
 ) -> dict:
     """Analyze a single matchup and return the analysis dict."""
     team1_id, team1_name = home_id, home_name
@@ -127,8 +129,8 @@ async def analyze_game(
 
     all_standings = await get_all_standings(season)
 
-    team1_recent_games = await get_team_recent_games(team1_id, season, 5, all_standings)
-    team2_recent_games = await get_team_recent_games(team2_id, season, 5, all_standings)
+    team1_recent_games = await get_team_recent_games(team1_id, season, all_standings)
+    team2_recent_games = await get_team_recent_games(team2_id, season, all_standings)
 
     matchup_analysis = build_matchup_analysis({
         "team1_name": team1_name,
@@ -145,6 +147,7 @@ async def analyze_game(
         "h2h_summary": h2h_summary,
         "h2h_results": h2h_results,
         "game_date": game_date,
+        "league_avg_efficiency": league_avg_efficiency,
     })
 
     matchup_analysis["api_game_id"] = api_game_id
@@ -167,6 +170,10 @@ async def main() -> None:
         return
 
     print(f"Found {len(games)} games for {game_date}")
+
+    # Compute league-average efficiency (cached monthly)
+    league_avg_efficiency = await compute_league_avg_efficiency(season)
+    print(f"League avg efficiency: {league_avg_efficiency}")
 
     # Fetch odds for all NBA games (single API call)
     print("Fetching betting odds...")
@@ -194,6 +201,7 @@ async def main() -> None:
                 game_date=game_date,
                 season=season,
                 api_game_id=game["id"],
+                league_avg_efficiency=league_avg_efficiency,
             )
 
             # Add odds if available

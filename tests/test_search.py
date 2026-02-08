@@ -36,24 +36,22 @@ MATCHUP_STR = "Celtics @ Lakers"
 
 
 class TestCompactJson:
-    def test_removes_whitespace(self):
+    def test_no_indent(self):
         result = compact_json({"key": "value", "num": 1})
-        assert " " not in result
         assert "\n" not in result
 
-    def test_no_space_after_colon(self):
+    def test_minimal_separators(self):
         result = compact_json({"a": 1})
-        assert ": " not in result
-        assert '{"a":1}' == result
+        assert '{"a": 1}' == result
 
-    def test_no_space_after_comma(self):
+    def test_comma_space_separator(self):
         result = compact_json({"a": 1, "b": 2})
-        assert ", " not in result
+        assert ", " in result
 
     def test_nested_structures(self):
         data = {"outer": {"inner": [1, 2, 3]}}
         result = compact_json(data)
-        assert result == '{"outer":{"inner":[1,2,3]}}'
+        assert result == '{"outer": {"inner": [1, 2, 3]}}'
 
     def test_preserves_all_data(self):
         import json
@@ -67,6 +65,14 @@ class TestCompactJson:
     def test_handles_strings_with_spaces(self):
         result = compact_json({"name": "Los Angeles Lakers"})
         assert "Los Angeles Lakers" in result
+
+    def test_strips_none_and_empty(self):
+        data = {"name": "Lakers", "value": None, "empty": [], "nested": {}}
+        result = compact_json(data)
+        assert "value" not in result
+        assert "empty" not in result
+        assert "nested" not in result
+        assert "Lakers" in result
 
 
 class TestBuildSearchSummary:

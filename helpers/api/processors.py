@@ -1,5 +1,8 @@
 """Data processing functions and hybrid fetch+process functions."""
 
+import json
+from datetime import date, datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from ..utils import get_current_nba_season_year
@@ -12,6 +15,14 @@ from .types import (
     ScheduledGame,
 )
 from .client import fetch_nba_api, get_team_statistics, get_games_by_date
+
+RECENT_GAMES_LIMIT = 10
+TOP_PLAYERS = 10
+MIN_PLAYER_GAMES = 3
+
+_FALLBACK_EFFICIENCY = 113.5  # avoid circular import with matchup.py
+LEAGUE_EFFICIENCY_CACHE = Path(__file__).parent.parent.parent / "bets" / "cache" / "league_avg_efficiency.json"
+LEAGUE_EFFICIENCY_MAX_AGE_DAYS = 30
 
 
 def parse_minutes(min_str: str) -> float:
@@ -30,8 +41,8 @@ def parse_minutes(min_str: str) -> float:
 
 def process_player_statistics(
     raw_stats: List[TeamPlayerStatistics],
-    top_n: int = 8,
-    min_games: int = 5
+    top_n: int = TOP_PLAYERS,
+    min_games: int = MIN_PLAYER_GAMES
 ) -> List[ProcessedPlayerStats]:
     """
     Process raw player statistics into aggregated per-game stats.
@@ -224,10 +235,62 @@ async def get_team_statistics_for_seasons(
     return seasons_stats
 
 
+async def compute_league_avg_efficiency(season: int) -> float:
+    """Compute league-average offensive efficiency, cached to bets/cache/.
+
+    Fetches all teams' season stats, computes avg (ppg/pace)*100.
+    Cache is valid for 30 days. Falls back to _FALLBACK_EFFICIENCY on any failure.
+    """
+    # Try cache
+    try:
+        if LEAGUE_EFFICIENCY_CACHE.exists():
+            with open(LEAGUE_EFFICIENCY_CACHE) as f:
+                cached = json.load(f)
+            cached_date = datetime.strptime(cached["date"], "%Y-%m-%d").date()
+            if cached.get("season") == season and (date.today() - cached_date).days < LEAGUE_EFFICIENCY_MAX_AGE_DAYS:
+                return cached["efficiency"]
+    except (json.JSONDecodeError, KeyError, ValueError):
+        pass  # stale/corrupt cache, recompute
+
+    # Fetch all teams, filter to real NBA franchises (exclude international/all-star)
+    all_teams = await fetch_nba_api("teams")
+    if not all_teams:
+        return _FALLBACK_EFFICIENCY
+
+    teams = [t for t in all_teams if t.get("nbaFranchise") is True and t.get("allStar") is not True]
+
+    # Fetch each team's stats, compute ORTG = (ppg / pace) * 100
+    ortgs = []
+    for team in teams:
+        team_id = team.get("id")
+        if not team_id:
+            continue
+        raw = await get_team_statistics(team_id, season)
+        if raw and len(raw) > 0:
+            stats = process_team_stats(raw[0])
+            pace = stats["pace"]
+            if pace > 0:
+                ortgs.append(stats["ppg"] / pace * 100)
+
+    if not ortgs:
+        return _FALLBACK_EFFICIENCY
+
+    efficiency = round(sum(ortgs) / len(ortgs), 1)
+
+    # Write cache
+    try:
+        LEAGUE_EFFICIENCY_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        with open(LEAGUE_EFFICIENCY_CACHE, "w") as f:
+            json.dump({"date": str(date.today()), "season": season, "efficiency": efficiency, "teams": len(ortgs)}, f)
+    except OSError:
+        pass  # non-fatal if cache write fails
+
+    return efficiency
+
+
 async def get_team_recent_games(
     team_id: int,
     season: int,
-    limit: int = 5,
     all_standings: Optional[Dict[str, Dict[str, Any]]] = None
 ) -> List[RecentGame]:
     """
@@ -236,7 +299,6 @@ async def get_team_recent_games(
     Args:
         team_id: Team ID to fetch games for
         season: Season year
-        limit: Number of recent games to return
         all_standings: Optional dict of all team standings for opponent lookup
     """
     raw_games = await fetch_nba_api(f"games?team={team_id}&season={season}")
@@ -269,7 +331,7 @@ async def get_team_recent_games(
 
     # Take the last N games and process
     results: List[RecentGame] = []
-    for game in completed[:limit]:
+    for game in completed[:RECENT_GAMES_LIMIT]:
         is_home = game["teams"]["home"]["id"] == team_id
         team_points = (
             game["scores"]["home"]["points"]

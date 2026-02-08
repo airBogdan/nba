@@ -10,22 +10,18 @@ Never force a bet - "no edge" is a valid conclusion."""
 
 
 def compact_json(data: Any) -> str:
-    """Serialize data to JSON with no unnecessary whitespace."""
-    return json.dumps(data, separators=(",", ":"))
+    """Serialize data to compact JSON, stripping None/empty values."""
+    def _clean(obj):
+        if isinstance(obj, dict):
+            return {k: _clean(v) for k, v in obj.items()
+                    if v is not None and v != [] and v != {} and not str(k).startswith("_")}
+        elif isinstance(obj, list):
+            return [_clean(i) for i in obj]
+        return obj
+    return json.dumps(_clean(data), separators=(", ", ": "))
 
 
-ANALYZE_GAME_PROMPT = """Analyze this NBA matchup for betting value across all bet types.
-
-## Matchup: {matchup}
-**{home_team} is HOME** (NBA home teams win ~58% historically)
-
-## Matchup Data
-{matchup_json}
-{search_context}
-## Current Strategy
-{strategy}
-
-## Using the Odds Data
+ODDS_CONTEXT_SECTION = """## Using the Odds Data
 The matchup data includes an "odds" object with betting lines:
 - **spread**: Main spread with line and price for home/away teams
 - **total**: Main total with line, over price, under price
@@ -42,7 +38,25 @@ The matchup data includes an "odds" object with betting lines:
 - -110 is standard juice (bet $110 to win $100)
 - Positive odds (+150) mean underdog, higher = more value if you're confident
 - Large negative odds (-300+) rarely offer value unless you have very high confidence
+"""
 
+NO_ODDS_SECTION = """
+Note: No odds data available for this game. Base analysis on statistical matchup data only.
+"""
+
+
+ANALYZE_GAME_PROMPT = """Analyze this NBA matchup for betting value across all bet types.
+
+## Matchup: {matchup}
+**{home_team} is HOME** (NBA home teams win ~58% historically)
+
+## Matchup Data
+{matchup_json}
+{search_context}
+## Current Strategy
+{strategy}
+
+{odds_context}
 ## Bet Types to Evaluate
 1. **Moneyline**: Which team wins outright? Consider the price - heavy favorites (-300+) need high confidence.
 2. **Spread**: Use expected_margin to determine if a team covers. Consider alternate lines if edge is marginal.
@@ -67,10 +81,23 @@ You can recommend MULTIPLE bets on the same game if independent edges exist:
 - Low: Slight lean but significant uncertainty
 - Skip: No clear edge
 
+## Required Analysis Steps
+Before making picks, work through these calculations explicitly:
+1. **Expected Margin**: Start with net_rating_diff / 2, add home_court (+3), add rest_adj, add injury_adj → your expected margin
+2. **Expected Total**: Start with team1_ppg + team2_ppg, adjust for pace, adjust for H2H avg_total → your projected total
+3. **Edge Check**: For each bet type, state "My projection: X, Line: Y, Edge: Z" before assigning confidence
+
 Respond with JSON:
 {{
   "game_id": "{game_id}",
   "matchup": "{matchup}",
+  "margin_calculation": {{
+    "net_rating_component": 2.5,
+    "home_court_adj": 3.0,
+    "rest_adj": 0.0,
+    "injury_adj": 0.0,
+    "raw_margin": 5.5
+  }},
   "expected_margin": 5.5,  // Positive = home team favored, negative = away favored
   "expected_total": 225.0,  // Your projected combined score
   "moneyline": {{
@@ -136,6 +163,7 @@ Each analysis includes a "recommended_bets" array - these are the analyst's pre-
    - Spread + total = usually uncorrelated (can bet both)
    - Multiple games with same edge type = consider diversifying
 7. Use the specific line from the analysis (may be alternate, not main line)
+8. **Spread caution**: Our spread record is 1-2 (33%). Only include spreads when the analyst's expected margin exceeds the line by 5+ points.
 
 Respond with JSON:
 {{
@@ -215,6 +243,9 @@ UPDATE_STRATEGY_PROMPT = """Update the betting strategy based on actual results.
 ## Recent Bets (last 20)
 {recent_bets}
 
+## Reflection Patterns
+{reflection_patterns}
+
 ## Recent Journal Entries
 {recent_journals}
 
@@ -234,9 +265,12 @@ Analyze the data to find SPECIFIC patterns:
    - How much does rest advantage matter in practice?
    - Any team-specific patterns?
 
-4. **Process Fixes**: Look at reflections in journal entries
+4. **Process Fixes**: Look at reflections in journal entries AND the reflection patterns above
    - What factors did we consistently miss?
    - What should we weight more/less?
+   - Use reflection patterns to identify systemic process issues
+   - If edge validity < 60%, our edge identification is unreliable
+   - Common missed factors should become explicit checklist items
 
 Write a complete updated strategy.md document with:
 - Core Principles (keep what works, cut what doesn't)
@@ -331,13 +365,17 @@ SIZING_PROMPT = """Review these proposed bets and assign dollar amounts.
 ## Recent Performance
 {history_summary}
 
+## Sizing Method: Half Kelly Criterion
+Each bet includes `kelly_recommended` — the mathematically optimal half-Kelly amount based on:
+- Confidence → win probability: high=65%, medium=57%, low=54%
+- Actual odds price for the bet
+- Capped at 3% of bankroll per bet
+
 ## Your Job
 For each bet:
 1. **Validate**: Is the reasoning sound? Is the edge real?
-2. **Size**: How much to bet? Consider confidence, edge strength, and bankroll position.
-3. **Veto**: Assign $0 if the reasoning is weak or the edge is too thin.
-
-You have full discretion on sizing. Develop your own approach and learn from results.
+2. **Size**: Use `kelly_recommended` as your baseline. You may reduce below Kelly for weak reasoning.
+3. **Veto**: Assign $0 if the edge isn't real. Do NOT size above `kelly_recommended`.
 
 Respond with JSON:
 {{

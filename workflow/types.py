@@ -136,11 +136,22 @@ class _CompletedBetRequired(TypedDict):
     reflection: str
 
 
+class StructuredReflection(TypedDict):
+    """Structured reflection on a completed bet."""
+
+    edge_valid: bool
+    missed_factors: List[str]
+    process_assessment: Literal["sound", "flawed", "unlucky", "lucky"]
+    key_lesson: str
+    summary: str
+
+
 class CompletedBet(_CompletedBetRequired, total=False):
     """Bet with result."""
 
     amount: float  # Dollar amount wagered
     odds_price: int  # American odds used
+    structured_reflection: StructuredReflection
 
 
 class GameResult(TypedDict):

@@ -1,11 +1,19 @@
 """Tests for helpers/api.py."""
 
+import json
+from unittest.mock import AsyncMock, patch
+
 import pytest
 
 from helpers.api import (
     parse_minutes,
     process_player_statistics,
     process_team_stats,
+)
+from helpers.api.processors import (
+    compute_league_avg_efficiency,
+    _FALLBACK_EFFICIENCY,
+    LEAGUE_EFFICIENCY_CACHE,
 )
 
 
@@ -102,7 +110,7 @@ class TestProcessPlayerStatistics:
              "min": "28:00", "points": 21, "totReb": 10, "assists": 2, "steals": 1,
              "blocks": 2, "turnovers": 1, "fgm": 8, "fga": 16, "tpm": 0, "tpa": 1,
              "ftm": 5, "fta": 7, "plusMinus": "10"},
-            # Player 3 - only 3 games (below min_games threshold)
+            # Player 3 - only 3 games (at default threshold, filtered when min_games=5)
             {"player": {"id": 3, "firstname": "Austin", "lastname": "Reaves"},
              "min": "25:00", "points": 15, "totReb": 3, "assists": 5, "steals": 1,
              "blocks": 0, "turnovers": 2, "fgm": 6, "fga": 12, "tpm": 2, "tpa": 5,
@@ -300,3 +308,97 @@ class TestProcessTeamStats:
         assert result["ppg"] == 0.0
         assert result["tpp"] == 0.0
         assert result["fgp"] == 0.0
+
+
+class TestComputeLeagueAvgEfficiency:
+    """Tests for compute_league_avg_efficiency."""
+
+    def _make_raw_team_stats(self, points, games, fga, fta, turnovers, off_reb):
+        """Build a raw stats list matching API shape."""
+        return [{
+            "games": games, "points": points,
+            "fga": fga, "fta": fta, "turnovers": turnovers, "offReb": off_reb,
+            "defReb": 500, "totReb": 700, "assists": 400,
+            "steals": 100, "blocks": 80, "plusMinus": 50,
+            "tpp": "36.0", "fgp": "46.0",
+        }]
+
+    @pytest.mark.asyncio
+    async def test_computes_from_api(self, tmp_path, monkeypatch):
+        """Computes average efficiency from all teams' stats."""
+        monkeypatch.setattr(
+            "helpers.api.processors.LEAGUE_EFFICIENCY_CACHE",
+            tmp_path / "cache" / "league_avg_efficiency.json",
+        )
+        teams = [
+            {"id": 1, "name": "Team A", "nbaFranchise": True, "allStar": False},
+            {"id": 2, "name": "Team B", "nbaFranchise": True, "allStar": False},
+            {"id": 99, "name": "All Stars", "nbaFranchise": True, "allStar": True},
+            {"id": 100, "name": "Shanghai Sharks", "nbaFranchise": False, "allStar": False},
+        ]
+        # Team A: 110 ppg, pace ~104 → ORTG ~105.8
+        # Team B: 115 ppg, pace ~104 → ORTG ~110.6
+        stats_a = self._make_raw_team_stats(2200, 20, 1800, 450, 280, 200)
+        stats_b = self._make_raw_team_stats(2300, 20, 1800, 450, 280, 200)
+
+        with patch("helpers.api.processors.fetch_nba_api", new_callable=AsyncMock, return_value=teams) as mock_teams, \
+             patch("helpers.api.processors.get_team_statistics", new_callable=AsyncMock) as mock_stats:
+            mock_stats.side_effect = [stats_a, stats_b]
+            result = await compute_league_avg_efficiency(2025)
+
+        assert 105 < result < 115  # reasonable NBA range
+        # Only 2 real NBA teams should have stats fetched (not all-star or international)
+        assert mock_stats.call_count == 2
+        # Cache file should be written
+        cache_file = tmp_path / "cache" / "league_avg_efficiency.json"
+        assert cache_file.exists()
+
+    @pytest.mark.asyncio
+    async def test_reads_from_fresh_cache(self, tmp_path, monkeypatch):
+        """Returns cached value without API calls when cache is fresh."""
+        from datetime import date
+        cache_dir = tmp_path / "cache"
+        cache_dir.mkdir()
+        cache_file = cache_dir / "league_avg_efficiency.json"
+        cache_file.write_text(json.dumps({
+            "date": str(date.today()), "season": 2025, "efficiency": 114.2, "teams": 30
+        }))
+        monkeypatch.setattr(
+            "helpers.api.processors.LEAGUE_EFFICIENCY_CACHE", cache_file,
+        )
+
+        with patch("helpers.api.processors.fetch_nba_api", new_callable=AsyncMock) as mock_api:
+            result = await compute_league_avg_efficiency(2025)
+
+        assert result == 114.2
+        mock_api.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_fallback_when_api_fails(self, tmp_path, monkeypatch):
+        """Falls back to _FALLBACK_EFFICIENCY when API returns None."""
+        monkeypatch.setattr(
+            "helpers.api.processors.LEAGUE_EFFICIENCY_CACHE",
+            tmp_path / "no_cache.json",
+        )
+
+        with patch("helpers.api.processors.fetch_nba_api", new_callable=AsyncMock, return_value=None):
+            result = await compute_league_avg_efficiency(2025)
+
+        assert result == _FALLBACK_EFFICIENCY
+
+    @pytest.mark.asyncio
+    async def test_handles_corrupt_cache(self, tmp_path, monkeypatch):
+        """Recomputes when cache file is corrupt."""
+        cache_file = tmp_path / "league_avg_efficiency.json"
+        cache_file.write_text("not valid json{{{")
+        monkeypatch.setattr(
+            "helpers.api.processors.LEAGUE_EFFICIENCY_CACHE", cache_file,
+        )
+        teams = [{"id": 1, "name": "Team A", "nbaFranchise": True, "allStar": False}]
+        stats = self._make_raw_team_stats(2200, 20, 1800, 450, 280, 200)
+
+        with patch("helpers.api.processors.fetch_nba_api", new_callable=AsyncMock, return_value=teams), \
+             patch("helpers.api.processors.get_team_statistics", new_callable=AsyncMock, return_value=stats):
+            result = await compute_league_avg_efficiency(2025)
+
+        assert 100 < result < 120

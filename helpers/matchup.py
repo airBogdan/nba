@@ -6,10 +6,67 @@ from typing import Any, Dict, List, Optional
 from typing_extensions import TypedDict
 
 from .api import ProcessedPlayerStats, ProcessedTeamStats, RecentGame, Injury
-from .games import compute_quarter_analysis
+from .games import compute_quarter_analysis, _weighted_h2h_games
 from .teams import SeasonStanding
 from .types import H2HResults, H2HSummary, QuarterAnalysis
 from .utils import get_current_nba_season_year
+
+
+# === Constants ===
+# TODO: for user, test and tweak these variables based on betting results
+
+# Rest/schedule thresholds
+BACK_TO_BACK_THRESHOLD = 1
+REST_ADVANTAGE_THRESHOLD = 2
+
+# Player impact thresholds
+STAR_DEPENDENCY_THRESHOLD = 22
+AVAILABILITY_THRESHOLD = 0.7
+
+# Form thresholds (last 10 win%)
+FORM_HOT_THRESHOLD = 0.7
+FORM_COLD_THRESHOLD = 0.3
+
+# Home/away performance thresholds
+HOME_STRONG_THRESHOLD = 0.6
+HOME_WEAK_THRESHOLD = 0.4
+AWAY_STRONG_THRESHOLD = 0.55
+AWAY_WEAK_THRESHOLD = 0.35
+
+# Scoring/rating edge thresholds
+PPG_EDGE_THRESHOLD = 3.0
+NET_RATING_EDGE_THRESHOLD = 3.0
+
+# Pace thresholds
+FAST_PACE_THRESHOLD = 105
+SLOW_PACE_THRESHOLD = 98
+
+# Totals signal thresholds
+SCORING_TREND_THRESHOLD = 5
+H2H_VARIANCE_THRESHOLD = 15
+
+# H2H quarter/half tendency thresholds
+QUARTER_DIFF_THRESHOLD = 2
+HALFTIME_LEADER_THRESHOLD = 0.65
+HALF_SCORING_DIFF_THRESHOLD = 3
+
+# H2H vs season comparison thresholds
+FGP_DIFF_THRESHOLD = 3
+TPP_DIFF_THRESHOLD = 4
+TOV_DIFF_THRESHOLD = 2
+REB_DIFF_THRESHOLD = 3
+
+# League average defaults
+DEFAULT_LEAGUE_AVG_EFFICIENCY = 113.5
+DEFAULT_LEAGUE_AVG_TOTAL = 225.0
+LEAGUE_AVG_TOTAL_MIN = 180
+LEAGUE_AVG_TOTAL_MAX = 240
+
+# Regression factor for expected total
+REGRESSION_FACTOR = 0.15
+
+# Scoring regression threshold (recent PPG vs season PPG)
+SCORING_REGRESSION_THRESHOLD = 5
 
 
 # === TypedDict definitions ===
@@ -38,6 +95,10 @@ class TeamSnapshot(TypedDict):
     home_win_pct: float
     away_win_pct: float
     pace: float
+    recent_ppg: float
+    recent_margin: float
+    sos: float
+    sos_adjusted_net_rating: float
 
 
 class MatchupEdges(TypedDict):
@@ -51,6 +112,8 @@ class MatchupEdges(TypedDict):
     three_pt_pct: float
     pace: float
     combined_pace: float
+    weighted_form: float
+    adjusted_net_rating: float
 
 
 class H2HSummaryData(TypedDict):
@@ -194,6 +257,15 @@ class BuildMatchupInput(TypedDict):
 # === Helper functions ===
 
 
+def _exponential_decay_weights(n: int, half_life: float = 3.0) -> List[float]:
+    """Generate normalized exponential decay weights (most recent first)."""
+    if n == 0:
+        return []
+    raw = [math.exp(-math.log(2) * i / half_life) for i in range(n)]
+    total = sum(raw)
+    return [w / total for w in raw]
+
+
 def get_current_season_standing(standings: List[SeasonStanding]) -> Optional[SeasonStanding]:
     """Get standing for current season."""
     current_year = get_current_nba_season_year()
@@ -215,7 +287,9 @@ def get_current_season_stats(stats: Optional[Dict[int, ProcessedTeamStats]]) -> 
 def build_team_snapshot(
     name: str,
     standing: Optional[SeasonStanding],
-    stats: Optional[ProcessedTeamStats]
+    stats: Optional[ProcessedTeamStats],
+    league_avg_efficiency: float = DEFAULT_LEAGUE_AVG_EFFICIENCY,
+    recent_games: Optional[List[RecentGame]] = None,
 ) -> TeamSnapshot:
     """Build team snapshot with computed metrics."""
     last_ten_pct = standing.get("last_ten_pct", 0.0) if standing else 0.0
@@ -225,11 +299,26 @@ def build_team_snapshot(
     pace = stats.get("pace", 100.0) if stats else 100.0
 
     # Estimate ORTG/DRTG from net rating and pace
-    league_avg_efficiency = 112  # approximate 2024 NBA average
     ortg = round(league_avg_efficiency + net_rating / 2, 1)
     drtg = round(league_avg_efficiency - net_rating / 2, 1)
     # Points allowed estimate: DRTG * pace / 100
     opp_ppg = round(drtg * pace / 100, 1)
+
+    # Recency-weighted metrics
+    recent_ppg = ppg
+    recent_margin = 0.0
+    sos = 0.5
+    if recent_games:
+        weights = _exponential_decay_weights(len(recent_games))
+        recent_ppg = round(sum(int(g["score"].split("-")[0]) * w for g, w in zip(recent_games, weights)), 1)
+        recent_margin = round(sum(g["margin"] * w for g, w in zip(recent_games, weights)), 1)
+        opp_pcts = [g["vs_win_pct"] for g in recent_games if g.get("vs_win_pct", 0) > 0]
+        if opp_pcts:
+            sos = round(sum(opp_pcts) / len(opp_pcts), 3)
+
+    # SOS-adjusted net rating (additive — handles negative ratings correctly)
+    sos_adjustment = (sos - 0.5) * 10
+    sos_adjusted_net_rating = round(net_rating + sos_adjustment, 2)
 
     return {
         "name": name,
@@ -253,6 +342,10 @@ def build_team_snapshot(
         "home_win_pct": standing.get("home_win_pct", 0.0) if standing else 0.0,
         "away_win_pct": standing.get("away_win_pct", 0.0) if standing else 0.0,
         "pace": pace,
+        "recent_ppg": recent_ppg,
+        "recent_margin": recent_margin,
+        "sos": sos,
+        "sos_adjusted_net_rating": sos_adjusted_net_rating,
     }
 
 
@@ -268,6 +361,8 @@ def compute_edges(team1: TeamSnapshot, team2: TeamSnapshot) -> MatchupEdges:
         "three_pt_pct": round(team1["tpp"] - team2["tpp"], 1),
         "pace": round(team1["pace"] - team2["pace"], 1),
         "combined_pace": round((team1["pace"] + team2["pace"]) / 2, 1),
+        "weighted_form": round(team1.get("recent_margin", 0) - team2.get("recent_margin", 0), 1),
+        "adjusted_net_rating": round(team1.get("sos_adjusted_net_rating", 0) - team2.get("sos_adjusted_net_rating", 0), 2),
     }
 
 
@@ -320,113 +415,100 @@ def compute_h2h_matchup_stats(
     team1_name: str,
     team2_name: str
 ) -> Optional[H2HMatchupStats]:
-    """Compute aggregated stats for each team from H2H box scores."""
+    """Compute recency-weighted aggregated stats for each team from H2H box scores."""
     if not h2h_results:
         return None
 
-    # Collect stats for each team
-    team1_stats = {
-        "fgp": [], "tpp": [],
-        "rebounds": [], "assists": [], "turnovers": [],
-        "disruption": []  # steals + blocks
-    }
-    team2_stats = {
-        "fgp": [], "tpp": [],
-        "rebounds": [], "assists": [], "turnovers": [],
-        "disruption": []
-    }
+    weighted_games = _weighted_h2h_games(h2h_results)
 
-    for games in h2h_results.values():
-        for game in games:
-            home_stats = game.get("home_statistics")
-            visitor_stats = game.get("visitor_statistics")
+    # Filter to games with box scores and collect weighted stats
+    t1_accum = {"fgp": 0.0, "tpp": 0.0, "rebounds": 0.0, "assists": 0.0, "turnovers": 0.0, "disruption": 0.0}
+    t2_accum = {"fgp": 0.0, "tpp": 0.0, "rebounds": 0.0, "assists": 0.0, "turnovers": 0.0, "disruption": 0.0}
+    total_weight = 0.0
 
-            if not home_stats or not visitor_stats:
-                continue
+    for game, w in weighted_games:
+        home_stats = game.get("home_statistics")
+        visitor_stats = game.get("visitor_statistics")
 
-            # Determine which stats belong to which team
-            is_team1_home = game["home_team"] == team1_name
-            t1_stats = home_stats if is_team1_home else visitor_stats
-            t2_stats = visitor_stats if is_team1_home else home_stats
+        if not home_stats or not visitor_stats:
+            continue
 
-            # Collect team1 stats
-            team1_stats["fgp"].append(float(t1_stats.get("fgp", 0) or 0))
-            team1_stats["tpp"].append(float(t1_stats.get("tpp", 0) or 0))
-            team1_stats["rebounds"].append(t1_stats.get("totReb", 0) or 0)
-            team1_stats["assists"].append(t1_stats.get("assists", 0) or 0)
-            team1_stats["turnovers"].append(t1_stats.get("turnovers", 0) or 0)
-            t1_steals = t1_stats.get("steals", 0) or 0
-            t1_blocks = t1_stats.get("blocks", 0) or 0
-            team1_stats["disruption"].append(t1_steals + t1_blocks)
+        is_team1_home = game["home_team"] == team1_name
+        t1_stats = home_stats if is_team1_home else visitor_stats
+        t2_stats = visitor_stats if is_team1_home else home_stats
 
-            # Collect team2 stats
-            team2_stats["fgp"].append(float(t2_stats.get("fgp", 0) or 0))
-            team2_stats["tpp"].append(float(t2_stats.get("tpp", 0) or 0))
-            team2_stats["rebounds"].append(t2_stats.get("totReb", 0) or 0)
-            team2_stats["assists"].append(t2_stats.get("assists", 0) or 0)
-            team2_stats["turnovers"].append(t2_stats.get("turnovers", 0) or 0)
-            t2_steals = t2_stats.get("steals", 0) or 0
-            t2_blocks = t2_stats.get("blocks", 0) or 0
-            team2_stats["disruption"].append(t2_steals + t2_blocks)
+        t1_accum["fgp"] += float(t1_stats.get("fgp", 0) or 0) * w
+        t1_accum["tpp"] += float(t1_stats.get("tpp", 0) or 0) * w
+        t1_accum["rebounds"] += (t1_stats.get("totReb", 0) or 0) * w
+        t1_accum["assists"] += (t1_stats.get("assists", 0) or 0) * w
+        t1_accum["turnovers"] += (t1_stats.get("turnovers", 0) or 0) * w
+        t1_accum["disruption"] += ((t1_stats.get("steals", 0) or 0) + (t1_stats.get("blocks", 0) or 0)) * w
 
-    games_count = len(team1_stats["fgp"])
-    if games_count == 0:
+        t2_accum["fgp"] += float(t2_stats.get("fgp", 0) or 0) * w
+        t2_accum["tpp"] += float(t2_stats.get("tpp", 0) or 0) * w
+        t2_accum["rebounds"] += (t2_stats.get("totReb", 0) or 0) * w
+        t2_accum["assists"] += (t2_stats.get("assists", 0) or 0) * w
+        t2_accum["turnovers"] += (t2_stats.get("turnovers", 0) or 0) * w
+        t2_accum["disruption"] += ((t2_stats.get("steals", 0) or 0) + (t2_stats.get("blocks", 0) or 0)) * w
+
+        total_weight += w
+
+    if total_weight == 0:
         return None
 
-    def avg(lst: list) -> float:
-        return round(sum(lst) / len(lst), 1) if lst else 0.0
+    def wavg(val: float) -> float:
+        return round(val / total_weight, 1)
 
     return {
         "team1": {
-            "avg_fgp": avg(team1_stats["fgp"]),
-            "avg_tpp": avg(team1_stats["tpp"]),
-            "avg_rebounds": avg(team1_stats["rebounds"]),
-            "avg_assists": avg(team1_stats["assists"]),
-            "avg_turnovers": avg(team1_stats["turnovers"]),
-            "avg_disruption": avg(team1_stats["disruption"]),
+            "avg_fgp": wavg(t1_accum["fgp"]),
+            "avg_tpp": wavg(t1_accum["tpp"]),
+            "avg_rebounds": wavg(t1_accum["rebounds"]),
+            "avg_assists": wavg(t1_accum["assists"]),
+            "avg_turnovers": wavg(t1_accum["turnovers"]),
+            "avg_disruption": wavg(t1_accum["disruption"]),
         },
         "team2": {
-            "avg_fgp": avg(team2_stats["fgp"]),
-            "avg_tpp": avg(team2_stats["tpp"]),
-            "avg_rebounds": avg(team2_stats["rebounds"]),
-            "avg_assists": avg(team2_stats["assists"]),
-            "avg_turnovers": avg(team2_stats["turnovers"]),
-            "avg_disruption": avg(team2_stats["disruption"]),
+            "avg_fgp": wavg(t2_accum["fgp"]),
+            "avg_tpp": wavg(t2_accum["tpp"]),
+            "avg_rebounds": wavg(t2_accum["rebounds"]),
+            "avg_assists": wavg(t2_accum["assists"]),
+            "avg_turnovers": wavg(t2_accum["turnovers"]),
+            "avg_disruption": wavg(t2_accum["disruption"]),
         },
     }
 
 
 def compute_h2h_patterns(h2h_results: Optional[H2HResults]) -> Optional[H2HPatterns]:
-    """Compute H2H patterns from results."""
+    """Compute recency-weighted H2H patterns from results."""
     if not h2h_results:
         return None
 
-    all_games = [g for games in h2h_results.values() for g in games]
-    if len(all_games) == 0:
+    weighted_games = _weighted_h2h_games(h2h_results)
+    if not weighted_games:
         return None
 
-    total_games = len(all_games)
-    total_combined_score = 0
-    home_wins = 0
-    high_scoring = 0  # games over 220
-    close_games = 0  # margin <= 5
+    weighted_total_score = 0.0
+    weighted_home_wins = 0.0
+    weighted_high_scoring = 0.0
+    weighted_close_games = 0.0
 
-    for game in all_games:
+    for game, w in weighted_games:
         combined = game["home_points"] + game["visitor_points"]
-        total_combined_score += combined
+        weighted_total_score += combined * w
 
         if game["winner"] == game["home_team"]:
-            home_wins += 1
+            weighted_home_wins += w
         if combined > 220:
-            high_scoring += 1
+            weighted_high_scoring += w
         if abs(game["point_diff"]) <= 5:
-            close_games += 1
+            weighted_close_games += w
 
     return {
-        "avg_total": round(total_combined_score / total_games, 1),
-        "home_win_pct": round(home_wins / total_games, 3),
-        "high_scoring_pct": round(high_scoring / total_games, 2),
-        "close_game_pct": round(close_games / total_games, 2),
+        "avg_total": round(weighted_total_score, 1),
+        "home_win_pct": round(weighted_home_wins, 3),
+        "high_scoring_pct": round(weighted_high_scoring, 2),
+        "close_game_pct": round(weighted_close_games, 2),
     }
 
 
@@ -584,25 +666,25 @@ def generate_signals(
     team1_rest = compute_days_rest(team1_recent, game_date)
     team2_rest = compute_days_rest(team2_recent, game_date)
 
-    if team1_rest is not None and team1_rest <= 1:
+    if team1_rest is not None and team1_rest <= BACK_TO_BACK_THRESHOLD:
         rest_label = "playing second game today" if team1_rest == 0 else "on back-to-back"
         signals.append(f"{team1['name']} {rest_label} (fatigue factor)")
-    if team2_rest is not None and team2_rest <= 1:
+    if team2_rest is not None and team2_rest <= BACK_TO_BACK_THRESHOLD:
         rest_label = "playing second game today" if team2_rest == 0 else "on back-to-back"
         signals.append(f"{team2['name']} {rest_label} (fatigue factor)")
 
     # Rest advantage
     if team1_rest is not None and team2_rest is not None:
         rest_diff = team1_rest - team2_rest
-        if rest_diff >= 2:
+        if rest_diff >= REST_ADVANTAGE_THRESHOLD:
             signals.append(f"{team1['name']} rest advantage ({team1_rest} days vs {team2_rest} days)")
-        elif rest_diff <= -2:
+        elif rest_diff <= -REST_ADVANTAGE_THRESHOLD:
             signals.append(f"{team2['name']} rest advantage ({team2_rest} days vs {team1_rest} days)")
 
     # === STAR PLAYER IMPACT SIGNALS (Tier 1) ===
-    if team1_players and not team1_players["full_strength"] and team1_players["star_dependency"] > 22:
+    if team1_players and not team1_players["full_strength"] and team1_players["star_dependency"] > STAR_DEPENDENCY_THRESHOLD:
         signals.append(f"{team1['name']} missing {team1_players['star_dependency']:.0f}% of offense with key players limited")
-    if team2_players and not team2_players["full_strength"] and team2_players["star_dependency"] > 22:
+    if team2_players and not team2_players["full_strength"] and team2_players["star_dependency"] > STAR_DEPENDENCY_THRESHOLD:
         signals.append(f"{team2['name']} missing {team2_players['star_dependency']:.0f}% of offense with key players limited")
 
     # === WIN/LOSS STREAK SIGNALS (Tier 2) ===
@@ -626,23 +708,23 @@ def generate_signals(
 
         # Q1 tendency
         q1_diff = q["team1_q1_avg"] - q["team2_q1_avg"]
-        if abs(q1_diff) >= 2:
+        if abs(q1_diff) >= QUARTER_DIFF_THRESHOLD:
             q1_leader = team1["name"] if q1_diff > 0 else team2["name"]
             signals.append(f"{q1_leader} starts faster (+{abs(q1_diff):.1f} Q1 avg in H2H)")
 
         # Q4 tendency (closing strength)
         q4_diff = q["team1_q4_avg"] - q["team2_q4_avg"]
-        if abs(q4_diff) >= 2:
+        if abs(q4_diff) >= QUARTER_DIFF_THRESHOLD:
             q4_leader = team1["name"] if q4_diff > 0 else team2["name"]
             signals.append(f"{q4_leader} stronger closer (+{abs(q4_diff):.1f} Q4 avg in H2H)")
 
         # Halftime leader reliability
-        if q["halftime_leader_wins_pct"] >= 0.65:
+        if q["halftime_leader_wins_pct"] >= HALFTIME_LEADER_THRESHOLD:
             signals.append(f"Halftime leader wins {q['halftime_leader_wins_pct'] * 100:.0f}% in this matchup")
 
         # Half scoring tendency
         half_diff = q["avg_first_half"] - q["avg_second_half"]
-        if abs(half_diff) >= 3:
+        if abs(half_diff) >= HALF_SCORING_DIFF_THRESHOLD:
             if half_diff > 0:
                 signals.append(f"H2H games front-loaded (1H avg {q['avg_first_half']} vs 2H avg {q['avg_second_half']})")
             else:
@@ -657,37 +739,44 @@ def generate_signals(
         signals.append(f"{team2['name']} injury concerns: {', '.join(concerns)}")
 
     # Form signals (based on last 10 games)
-    if team1["last_ten_pct"] >= 0.7:
+    if team1["last_ten_pct"] >= FORM_HOT_THRESHOLD:
         signals.append(f"{team1['name']} hot form ({team1['last_ten']} L10)")
-    elif team1["last_ten_pct"] <= 0.3:
+    elif team1["last_ten_pct"] <= FORM_COLD_THRESHOLD:
         signals.append(f"{team1['name']} struggling ({team1['last_ten']} L10)")
 
-    if team2["last_ten_pct"] >= 0.7:
+    if team2["last_ten_pct"] >= FORM_HOT_THRESHOLD:
         signals.append(f"{team2['name']} hot form ({team2['last_ten']} L10)")
-    elif team2["last_ten_pct"] <= 0.3:
+    elif team2["last_ten_pct"] <= FORM_COLD_THRESHOLD:
         signals.append(f"{team2['name']} struggling ({team2['last_ten']} L10)")
 
     # Home/away performance
-    if home_snapshot["home_win_pct"] > 0.6:
+    if home_snapshot["home_win_pct"] > HOME_STRONG_THRESHOLD:
         signals.append(f"{home_snapshot['name']} strong at home ({home_snapshot['home_record']})")
-    elif home_snapshot["home_win_pct"] < 0.4:
+    elif home_snapshot["home_win_pct"] < HOME_WEAK_THRESHOLD:
         signals.append(f"{home_snapshot['name']} struggling at home ({home_snapshot['home_record']})")
 
-    if away_snapshot["away_win_pct"] > 0.55:
+    if away_snapshot["away_win_pct"] > AWAY_STRONG_THRESHOLD:
         signals.append(f"{away_snapshot['name']} solid on road ({away_snapshot['away_record']})")
-    elif away_snapshot["away_win_pct"] < 0.35:
+    elif away_snapshot["away_win_pct"] < AWAY_WEAK_THRESHOLD:
         signals.append(f"{away_snapshot['name']} poor on road ({away_snapshot['away_record']})")
 
     # Scoring edge
-    if abs(comparison["ppg"]) >= 3:
+    if abs(comparison["ppg"]) >= PPG_EDGE_THRESHOLD:
         better = team1["name"] if comparison["ppg"] > 0 else team2["name"]
         signals.append(f"{better} +{abs(comparison['ppg']):.1f} PPG edge")
 
     # Net rating edge
-    if abs(comparison["net_rating"]) >= 3:
+    if abs(comparison["net_rating"]) >= NET_RATING_EDGE_THRESHOLD:
         better = team1["name"] if comparison["net_rating"] > 0 else team2["name"]
-        sign = "+" if comparison["net_rating"] > 0 else ""
-        signals.append(f"{better} significantly better net rating ({sign}{comparison['net_rating']:.1f})")
+        signals.append(f"{better} significantly better net rating (+{abs(comparison['net_rating']):.1f})")
+
+    # SOS signal
+    sos_diff = abs(team1.get("sos", 0.5) - team2.get("sos", 0.5))
+    if sos_diff > 0.05:
+        t1_sos = team1.get("sos", 0.5)
+        t2_sos = team2.get("sos", 0.5)
+        harder = team1["name"] if t1_sos > t2_sos else team2["name"]
+        signals.append(f"{harder} faced tougher schedule (SOS: {max(t1_sos, t2_sos):.3f} vs {min(t1_sos, t2_sos):.3f})")
 
     # H2H signals
     if h2h:
@@ -714,20 +803,20 @@ def generate_signals(
             signals.append(f"Competitive series ({patterns['close_game_pct'] * 100:.0f}% decided by 5 or less)")
 
     # Pace-based O/U signal
-    if comparison["combined_pace"] > 105:
+    if comparison["combined_pace"] > FAST_PACE_THRESHOLD:
         signals.append(f"Fast-paced matchup (avg {comparison['combined_pace']} possessions) - lean OVER")
-    elif comparison["combined_pace"] < 98:
+    elif comparison["combined_pace"] < SLOW_PACE_THRESHOLD:
         signals.append(f"Slow-paced matchup (avg {comparison['combined_pace']} possessions) - lean UNDER")
 
     # Recent scoring trend
-    if abs(totals_analysis["recent_scoring_trend"]) > 5:
+    if abs(totals_analysis["recent_scoring_trend"]) > SCORING_TREND_THRESHOLD:
         if totals_analysis["recent_scoring_trend"] > 0:
             signals.append(f"Both teams scoring above season avg in recent games (+{totals_analysis['recent_scoring_trend']} combined)")
         else:
             signals.append(f"Both teams scoring below season avg in recent games ({totals_analysis['recent_scoring_trend']} combined)")
 
     # High variance warning
-    if totals_analysis["h2h_total_variance"] > 15:
+    if totals_analysis["h2h_total_variance"] > H2H_VARIANCE_THRESHOLD:
         signals.append(f"High-variance H2H (±{totals_analysis['h2h_total_variance']} pts std dev in totals)")
 
     # === H2H vs SEASON PERFORMANCE SIGNALS ===
@@ -740,10 +829,10 @@ def generate_signals(
         t1_fgp_diff = t1_h2h["avg_fgp"] - team1["fgp"]
         t2_fgp_diff = t2_h2h["avg_fgp"] - team2["fgp"]
 
-        if abs(t1_fgp_diff) >= 3:
+        if abs(t1_fgp_diff) >= FGP_DIFF_THRESHOLD:
             direction = "elevated" if t1_fgp_diff > 0 else "suppressed"
             signals.append(f"{team1['name']} FG% {direction} vs {team2['name']}: {t1_h2h['avg_fgp']}% H2H vs {team1['fgp']}% season")
-        if abs(t2_fgp_diff) >= 3:
+        if abs(t2_fgp_diff) >= FGP_DIFF_THRESHOLD:
             direction = "elevated" if t2_fgp_diff > 0 else "suppressed"
             signals.append(f"{team2['name']} FG% {direction} vs {team1['name']}: {t2_h2h['avg_fgp']}% H2H vs {team2['fgp']}% season")
 
@@ -751,10 +840,10 @@ def generate_signals(
         t1_tpp_diff = t1_h2h["avg_tpp"] - team1["tpp"]
         t2_tpp_diff = t2_h2h["avg_tpp"] - team2["tpp"]
 
-        if abs(t1_tpp_diff) >= 4:
+        if abs(t1_tpp_diff) >= TPP_DIFF_THRESHOLD:
             direction = "hot" if t1_tpp_diff > 0 else "cold"
             signals.append(f"{team1['name']} {direction} from 3 vs {team2['name']}: {t1_h2h['avg_tpp']}% H2H vs {team1['tpp']}% season")
-        if abs(t2_tpp_diff) >= 4:
+        if abs(t2_tpp_diff) >= TPP_DIFF_THRESHOLD:
             direction = "hot" if t2_tpp_diff > 0 else "cold"
             signals.append(f"{team2['name']} {direction} from 3 vs {team1['name']}: {t2_h2h['avg_tpp']}% H2H vs {team2['tpp']}% season")
 
@@ -762,10 +851,10 @@ def generate_signals(
         t1_tov_diff = t1_h2h["avg_turnovers"] - team1["topg"]
         t2_tov_diff = t2_h2h["avg_turnovers"] - team2["topg"]
 
-        if abs(t1_tov_diff) >= 2:
+        if abs(t1_tov_diff) >= TOV_DIFF_THRESHOLD:
             direction = "careless" if t1_tov_diff > 0 else "careful"
             signals.append(f"{team1['name']} more {direction} vs {team2['name']}: {t1_h2h['avg_turnovers']} H2H vs {team1['topg']} season TOV")
-        if abs(t2_tov_diff) >= 2:
+        if abs(t2_tov_diff) >= TOV_DIFF_THRESHOLD:
             direction = "careless" if t2_tov_diff > 0 else "careful"
             signals.append(f"{team2['name']} more {direction} vs {team1['name']}: {t2_h2h['avg_turnovers']} H2H vs {team2['topg']} season TOV")
 
@@ -773,12 +862,21 @@ def generate_signals(
         t1_reb_diff = t1_h2h["avg_rebounds"] - team1["rpg"]
         t2_reb_diff = t2_h2h["avg_rebounds"] - team2["rpg"]
 
-        if abs(t1_reb_diff) >= 3:
+        if abs(t1_reb_diff) >= REB_DIFF_THRESHOLD:
             direction = "dominates" if t1_reb_diff > 0 else "struggles on"
             signals.append(f"{team1['name']} {direction} boards vs {team2['name']}: {t1_h2h['avg_rebounds']} H2H vs {team1['rpg']} season")
-        if abs(t2_reb_diff) >= 3:
+        if abs(t2_reb_diff) >= REB_DIFF_THRESHOLD:
             direction = "dominates" if t2_reb_diff > 0 else "struggles on"
             signals.append(f"{team2['name']} {direction} boards vs {team1['name']}: {t2_h2h['avg_rebounds']} H2H vs {team2['rpg']} season")
+
+    # === SCORING REGRESSION SIGNALS ===
+    for team in (team1, team2):
+        diff = team.get("recent_ppg", team["ppg"]) - team["ppg"]
+        if abs(diff) >= SCORING_REGRESSION_THRESHOLD:
+            if diff > 0:
+                signals.append(f"{team['name']} scoring {diff:+.1f} PPG above season avg recently — regression likely")
+            else:
+                signals.append(f"{team['name']} scoring {diff:+.1f} PPG below season avg recently — bounce-back likely")
 
     return signals
 
@@ -795,8 +893,12 @@ def compute_totals_analysis(
     # Current combined PPG
     current_total = team1["ppg"] + team2["ppg"]
 
-    # League average as fallback baseline
-    league_avg_total = 225
+    # Dynamic league average total from team data
+    team1_game_avg = team1["ppg"] + team1["opp_ppg"]
+    team2_game_avg = team2["ppg"] + team2["opp_ppg"]
+    league_avg_total = round((team1_game_avg + team2_game_avg) / 2, 1)
+    if league_avg_total < LEAGUE_AVG_TOTAL_MIN or league_avg_total > LEAGUE_AVG_TOTAL_MAX:
+        league_avg_total = DEFAULT_LEAGUE_AVG_TOTAL
 
     # H2H historical average total
     h2h_avg_total = h2h_summary.get("avg_total_points", league_avg_total) if h2h_summary else league_avg_total
@@ -804,6 +906,10 @@ def compute_totals_analysis(
     # Expected total: weight current form vs H2H/baseline
     h2h_weight = 0.4 if h2h_summary else 0.2
     expected_total = round(current_total * (1 - h2h_weight) + h2h_avg_total * h2h_weight, 1)
+
+    # Regression to mean
+    deviation = expected_total - league_avg_total
+    expected_total = round(expected_total - deviation * REGRESSION_FACTOR, 1)
 
     # How each team's current scoring compares to their H2H average
     team1_h2h_scoring_diff = round(team1["ppg"] - h2h_summary["team1_avg_points"], 1) if h2h_summary else 0.0
@@ -818,41 +924,30 @@ def compute_totals_analysis(
             # Margin volatility: std dev of point differentials
             margins = [abs(g["point_diff"]) for g in all_games]
             avg_margin = sum(margins) / len(margins)
-            margin_var = sum((m - avg_margin) ** 2 for m in margins) / len(margins)
+            margin_var = sum((m - avg_margin) ** 2 for m in margins) / (len(margins) - 1)
             margin_volatility = round(math.sqrt(margin_var), 1)
 
             # H2H total variance: std dev of combined scores
             totals = [g["home_points"] + g["visitor_points"] for g in all_games]
             avg_total = sum(totals) / len(totals)
-            total_var = sum((t - avg_total) ** 2 for t in totals) / len(totals)
+            total_var = sum((t - avg_total) ** 2 for t in totals) / (len(totals) - 1)
             h2h_total_variance = round(math.sqrt(total_var), 1)
 
-    # Pace-adjusted total
+    # Pace-adjusted total (both teams' expected scoring)
     combined_pace = (team1["pace"] + team2["pace"]) / 2
-    combined_ortg = (team1["ortg"] + team2["ortg"]) / 2
-    pace_adjusted_total = round(combined_pace * combined_ortg / 100, 1)
+    pace_adjusted_total = round(combined_pace * (team1["ortg"] + team2["ortg"]) / 100, 1)
 
     # Defense factor
     defense_factor = round((team1["drtg"] + team2["drtg"]) / 2, 1)
 
-    # Recent scoring trend
+    # Recent scoring trend (team PPG only, not combined game totals)
     recent_scoring_trend = 0.0
     if team1_recent and team2_recent:
-        team1_recent_avg = 0.0
-        for g in team1_recent:
-            pts = g["score"].split("-")
-            team1_recent_avg += int(pts[0]) + int(pts[1])
-        team1_recent_avg /= len(team1_recent)
-
-        team2_recent_avg = 0.0
-        for g in team2_recent:
-            pts = g["score"].split("-")
-            team2_recent_avg += int(pts[0]) + int(pts[1])
-        team2_recent_avg /= len(team2_recent)
-
-        season_avg_total = team1["ppg"] + team1["opp_ppg"] + team2["ppg"] + team2["opp_ppg"]
-        recent_avg_total = team1_recent_avg + team2_recent_avg
-        recent_scoring_trend = round((recent_avg_total - season_avg_total) / 2, 1)
+        team1_recent_ppg = sum(int(g["score"].split("-")[0]) for g in team1_recent) / len(team1_recent)
+        team2_recent_ppg = sum(int(g["score"].split("-")[0]) for g in team2_recent) / len(team2_recent)
+        recent_combined = team1_recent_ppg + team2_recent_ppg
+        season_combined = team1["ppg"] + team2["ppg"]
+        recent_scoring_trend = round(recent_combined - season_combined, 1)
 
     return {
         "expected_total": expected_total,
@@ -889,11 +984,10 @@ def build_team_players(
     ]
 
     # Compute availability concerns
-    availability_threshold = 0.7
     availability_concerns: List[str] = []
     for player in players:
         availability_pct = player["games"] / team_games if team_games > 0 else 1.0
-        if availability_pct < availability_threshold:
+        if availability_pct < AVAILABILITY_THRESHOLD:
             availability_concerns.append(f"{player['name']} ({player['games']}/{team_games} games)")
     full_strength = len(availability_concerns) == 0
 
@@ -911,7 +1005,7 @@ def build_team_players(
     # Playmaker (top APG)
     playmaker_player = by_apg[0]
     playmaker_availability = playmaker_player["games"] / team_games if team_games > 0 else 1.0
-    if playmaker_availability < 0.7:
+    if playmaker_availability < AVAILABILITY_THRESHOLD:
         playmaker = f"{playmaker_player['name']} {playmaker_player['apg']} APG (limited: {playmaker_player['games']} games)"
     else:
         playmaker = f"{playmaker_player['name']} {playmaker_player['apg']} APG"
@@ -920,7 +1014,7 @@ def build_team_players(
     hot_player = by_pm[0]
     hot_availability = hot_player["games"] / team_games if team_games > 0 else 1.0
     pm_sign = "+" if hot_player["plus_minus"] > 0 else ""
-    if hot_availability < 0.7:
+    if hot_availability < AVAILABILITY_THRESHOLD:
         hot_hand = f"{hot_player['name'].split()[-1]} {pm_sign}{hot_player['plus_minus']} (limited: {hot_player['games']} games)"
     else:
         hot_hand = f"{hot_player['name'].split()[-1]} {pm_sign}{hot_player['plus_minus']}"
@@ -934,7 +1028,7 @@ def build_team_players(
     variance = sum((mpg - avg_mpg) ** 2 for mpg in mpg_values) / len(mpg_values)
     depth_score = round(math.sqrt(variance), 1)
 
-    bench_players = players[5:8]
+    bench_players = players[5:]
     bench_scoring = round(sum(p["ppg"] for p in bench_players), 1)
 
     # Depth rating interpretation
@@ -977,8 +1071,17 @@ def build_matchup_analysis(input_data: BuildMatchupInput) -> MatchupAnalysis:
     team2_current_stats = get_current_season_stats(team2_stats)
 
     # Build snapshots
-    team1_snapshot = build_team_snapshot(team1_name, team1_standing, team1_current_stats)
-    team2_snapshot = build_team_snapshot(team2_name, team2_standing, team2_current_stats)
+    league_avg_efficiency = input_data.get("league_avg_efficiency", DEFAULT_LEAGUE_AVG_EFFICIENCY)
+    team1_snapshot = build_team_snapshot(
+        team1_name, team1_standing, team1_current_stats,
+        league_avg_efficiency=league_avg_efficiency,
+        recent_games=team1_recent_games,
+    )
+    team2_snapshot = build_team_snapshot(
+        team2_name, team2_standing, team2_current_stats,
+        league_avg_efficiency=league_avg_efficiency,
+        recent_games=team2_recent_games,
+    )
 
     # Compute comparison edges
     comparison = compute_edges(team1_snapshot, team2_snapshot)
