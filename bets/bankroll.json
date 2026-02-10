@@ -1,6 +1,6 @@
 {
   "starting": 1000.0,
-  "current": 778.1818181818182,
+  "current": 722.8318181818182,
   "transactions": [
     {
       "date": "2026-02-05",
@@ -148,6 +148,27 @@
       "amount": 43.90909090909091,
       "bet_id": "b491ec5a-a897-4a38-9402-3bfeb281bc2c",
       "description": "WIN: Cleveland Cavaliers @ Sacramento Kings (+$20.91)"
+    },
+    {
+      "date": "2026-02-10",
+      "type": "bet",
+      "amount": -23.35,
+      "bet_id": "6d0237ad-d4b0-4a03-874c-f86c8640120b",
+      "description": "Sacramento Kings @ New Orleans Pelicans - moneyline New Orleans Pelicans"
+    },
+    {
+      "date": "2026-02-10",
+      "type": "bet",
+      "amount": -20.0,
+      "bet_id": "4533804c-c380-473f-b4ff-6681967e3330",
+      "description": "Oklahoma City Thunder @ Los Angeles Lakers - moneyline Oklahoma City Thunder"
+    },
+    {
+      "date": "2026-02-10",
+      "type": "bet",
+      "amount": -12.0,
+      "bet_id": "cde2ab15-b1d6-4c13-ac3a-ea42841aa306",
+      "description": "Detroit Pistons @ Charlotte Hornets - moneyline Detroit Pistons"
     }
   ]
 }

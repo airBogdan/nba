@@ -1,0 +1,545 @@
+{
+  "matchup": {
+    "team1": "Miami Heat",
+    "team2": "Utah Jazz",
+    "home_team": "Miami Heat"
+  },
+  "current_season": {
+    "team1": {
+      "name": "Miami Heat",
+      "record": "28-27",
+      "conf_rank": 8,
+      "games": 61,
+      "ppg": 118.7,
+      "opp_ppg": 119.9,
+      "ortg": 112.8,
+      "drtg": 111.7,
+      "apg": 28.2,
+      "rpg": 46.8,
+      "topg": 14.7,
+      "net_rating": 1.1,
+      "fgp": 46.0,
+      "tpp": 35.5,
+      "last_ten": "5-5",
+      "last_ten_pct": 0.5,
+      "home_record": "16-10",
+      "away_record": "12-16",
+      "home_win_pct": 0.615,
+      "away_win_pct": 0.429,
+      "pace": 107.3,
+      "recent_ppg": 117.6,
+      "recent_margin": 7.4,
+      "sos": 0.447,
+      "sos_adjusted_net_rating": 0.57
+    },
+    "team2": {
+      "name": "Utah Jazz",
+      "record": "17-37",
+      "conf_rank": 13,
+      "games": 58,
+      "ppg": 118.5,
+      "opp_ppg": 122.9,
+      "ortg": 108.2,
+      "drtg": 116.2,
+      "apg": 29.9,
+      "rpg": 44.1,
+      "topg": 15.7,
+      "net_rating": -8.07,
+      "fgp": 46.9,
+      "tpp": 34.9,
+      "last_ten": "2-8",
+      "last_ten_pct": 0.2,
+      "home_record": "10-17",
+      "away_record": "6-20",
+      "home_win_pct": 0.37,
+      "away_win_pct": 0.231,
+      "pace": 105.8,
+      "recent_ppg": 115.1,
+      "recent_margin": -3.3,
+      "sos": 0.487,
+      "sos_adjusted_net_rating": -8.2
+    }
+  },
+  "schedule": {
+    "team1": {
+      "days_rest": 0,
+      "streak": "L1",
+      "games_last_7_days": 4,
+      "recent_opponent_avg_win_pct": 0.447,
+      "quality_wins": 1,
+      "quality_losses": 2
+    },
+    "team2": {
+      "days_rest": 0,
+      "streak": "W1",
+      "games_last_7_days": 4,
+      "recent_opponent_avg_win_pct": 0.487,
+      "quality_wins": 1,
+      "quality_losses": 5
+    }
+  },
+  "recent_games": {
+    "team1": [
+      {
+        "vs": "Utah Jazz",
+        "vs_record": "17-37",
+        "vs_win_pct": 0.315,
+        "result": "L",
+        "score": "111-115",
+        "home": true,
+        "margin": -4,
+        "date": "2026-02-10"
+      },
+      {
+        "vs": "Washington Wizards",
+        "vs_record": "14-38",
+        "vs_win_pct": 0.269,
+        "result": "W",
+        "score": "132-101",
+        "home": false,
+        "margin": 31,
+        "date": "2026-02-08"
+      },
+      {
+        "vs": "Boston Celtics",
+        "vs_record": "34-19",
+        "vs_win_pct": 0.642,
+        "result": "L",
+        "score": "96-98",
+        "home": false,
+        "margin": -2,
+        "date": "2026-02-07"
+      },
+      {
+        "vs": "Atlanta Hawks",
+        "vs_record": "26-29",
+        "vs_win_pct": 0.473,
+        "result": "L",
+        "score": "115-127",
+        "home": true,
+        "margin": -12,
+        "date": "2026-02-04"
+      },
+      {
+        "vs": "Chicago Bulls",
+        "vs_record": "24-30",
+        "vs_win_pct": 0.444,
+        "result": "W",
+        "score": "134-91",
+        "home": true,
+        "margin": 43,
+        "date": "2026-02-01"
+      },
+      {
+        "vs": "Chicago Bulls",
+        "vs_record": "24-30",
+        "vs_win_pct": 0.444,
+        "result": "L",
+        "score": "118-125",
+        "home": true,
+        "margin": -7,
+        "date": "2026-02-01"
+      },
+      {
+        "vs": "Chicago Bulls",
+        "vs_record": "24-30",
+        "vs_win_pct": 0.444,
+        "result": "W",
+        "score": "116-113",
+        "home": false,
+        "margin": 3,
+        "date": "2026-01-30"
+      },
+      {
+        "vs": "Orlando Magic",
+        "vs_record": "28-24",
+        "vs_win_pct": 0.538,
+        "result": "L",
+        "score": "124-133",
+        "home": true,
+        "margin": -9,
+        "date": "2026-01-29"
+      },
+      {
+        "vs": "Phoenix Suns",
+        "vs_record": "31-22",
+        "vs_win_pct": 0.585,
+        "result": "W",
+        "score": "111-102",
+        "home": false,
+        "margin": 9,
+        "date": "2026-01-26"
+      },
+      {
+        "vs": "Utah Jazz",
+        "vs_record": "17-37",
+        "vs_win_pct": 0.315,
+        "result": "W",
+        "score": "147-116",
+        "home": false,
+        "margin": 31,
+        "date": "2026-01-25"
+      }
+    ],
+    "team2": [
+      {
+        "vs": "Miami Heat",
+        "vs_record": "28-27",
+        "vs_win_pct": 0.509,
+        "result": "W",
+        "score": "115-111",
+        "home": false,
+        "margin": 4,
+        "date": "2026-02-10"
+      },
+      {
+        "vs": "Orlando Magic",
+        "vs_record": "28-24",
+        "vs_win_pct": 0.538,
+        "result": "L",
+        "score": "117-120",
+        "home": false,
+        "margin": -3,
+        "date": "2026-02-08"
+      },
+      {
+        "vs": "Atlanta Hawks",
+        "vs_record": "26-29",
+        "vs_win_pct": 0.473,
+        "result": "L",
+        "score": "119-121",
+        "home": false,
+        "margin": -2,
+        "date": "2026-02-06"
+      },
+      {
+        "vs": "Indiana Pacers",
+        "vs_record": "13-40",
+        "vs_win_pct": 0.245,
+        "result": "W",
+        "score": "131-122",
+        "home": false,
+        "margin": 9,
+        "date": "2026-02-04"
+      },
+      {
+        "vs": "Toronto Raptors",
+        "vs_record": "32-22",
+        "vs_win_pct": 0.593,
+        "result": "L",
+        "score": "100-107",
+        "home": false,
+        "margin": -7,
+        "date": "2026-02-01"
+      },
+      {
+        "vs": "Brooklyn Nets",
+        "vs_record": "15-37",
+        "vs_win_pct": 0.288,
+        "result": "L",
+        "score": "99-109",
+        "home": true,
+        "margin": -10,
+        "date": "2026-01-31"
+      },
+      {
+        "vs": "Golden State Warriors",
+        "vs_record": "29-25",
+        "vs_win_pct": 0.537,
+        "result": "L",
+        "score": "124-140",
+        "home": true,
+        "margin": -16,
+        "date": "2026-01-29"
+      },
+      {
+        "vs": "LA Clippers",
+        "vs_record": "25-27",
+        "vs_win_pct": 0.481,
+        "result": "L",
+        "score": "103-115",
+        "home": true,
+        "margin": -12,
+        "date": "2026-01-28"
+      },
+      {
+        "vs": "Miami Heat",
+        "vs_record": "28-27",
+        "vs_win_pct": 0.509,
+        "result": "L",
+        "score": "116-147",
+        "home": true,
+        "margin": -31,
+        "date": "2026-01-25"
+      },
+      {
+        "vs": "San Antonio Spurs",
+        "vs_record": "36-16",
+        "vs_win_pct": 0.692,
+        "result": "L",
+        "score": "109-126",
+        "home": true,
+        "margin": -17,
+        "date": "2026-01-23"
+      }
+    ]
+  },
+  "players": {
+    "team1": {
+      "rotation": [
+        {
+          "name": "Tyler Herro",
+          "ppg": 21.9,
+          "plus_minus": -3.4,
+          "games": 11
+        },
+        {
+          "name": "Andrew Wiggins",
+          "ppg": 15.3,
+          "plus_minus": -0.3,
+          "games": 55
+        },
+        {
+          "name": "Bam Adebayo",
+          "ppg": 17.6,
+          "plus_minus": 3.3,
+          "games": 52
+        },
+        {
+          "name": "Norman Powell",
+          "ppg": 22.3,
+          "plus_minus": 1.7,
+          "games": 50
+        },
+        {
+          "name": "Jamie Jr. Jaquez",
+          "ppg": 14.6,
+          "plus_minus": 1.8,
+          "games": 56
+        },
+        {
+          "name": "Davion Mitchell",
+          "ppg": 8.9,
+          "plus_minus": 3.4,
+          "games": 48
+        }
+      ],
+      "availability_concerns": [
+        "Tyler Herro (11/61 games)",
+        "Ethan Thompson (5/61 games)"
+      ],
+      "full_strength": false,
+      "top_scorers": "Powell 22.3, Herro 21.9, Adebayo 17.6",
+      "playmaker": "Davion Mitchell 6.8 APG",
+      "hot_hand": "Mitchell +3.4",
+      "star_dependency": 18.8,
+      "depth_rating": "balanced (4.9 MPG std dev)",
+      "bench_scoring": 44.8,
+      "injuries": []
+    },
+    "team2": {
+      "rotation": [
+        {
+          "name": "Lauri Markkanen",
+          "ppg": 26.2,
+          "plus_minus": -1.2,
+          "games": 42
+        },
+        {
+          "name": "Keyonte George",
+          "ppg": 23.0,
+          "plus_minus": -6.2,
+          "games": 52
+        },
+        {
+          "name": "Walker Kessler",
+          "ppg": 14.3,
+          "plus_minus": 4.2,
+          "games": 6
+        },
+        {
+          "name": "A. Bailey",
+          "ppg": 11.9,
+          "plus_minus": -6.1,
+          "games": 50
+        },
+        {
+          "name": "Jusuf Nurkic",
+          "ppg": 11.1,
+          "plus_minus": -4.6,
+          "games": 44
+        },
+        {
+          "name": "Isaiah Collier",
+          "ppg": 10.3,
+          "plus_minus": -7.1,
+          "games": 46
+        }
+      ],
+      "availability_concerns": [
+        "Walker Kessler (6/58 games)",
+        "Kyle Anderson (22/58 games)"
+      ],
+      "full_strength": false,
+      "top_scorers": "Markkanen 26.2, George 23.0, Kessler 14.3",
+      "playmaker": "Isaiah Collier 7.2 APG",
+      "hot_hand": "Kessler +4.2 (limited: 6 games)",
+      "star_dependency": 22.1,
+      "depth_rating": "balanced (4.6 MPG std dev)",
+      "bench_scoring": 47.9,
+      "injuries": []
+    }
+  },
+  "h2h": {
+    "summary": {
+      "total_games": 6,
+      "team1_wins_all_time": 3,
+      "team2_wins_all_time": 3,
+      "team1_win_pct": 0.5,
+      "team1_home_wins": 1,
+      "team1_home_losses": 2,
+      "team1_away_wins": 2,
+      "team1_away_losses": 1,
+      "avg_point_diff": 2.1,
+      "team1_avg_points": 117.6,
+      "team2_avg_points": 115.5,
+      "last_5_games": [
+        "Utah Jazz",
+        "Miami Heat",
+        "Utah Jazz",
+        "Miami Heat",
+        "Miami Heat"
+      ],
+      "recent_trend": "balanced",
+      "close_games": 2,
+      "blowouts": 2
+    },
+    "patterns": {
+      "avg_total": 233.1,
+      "home_win_pct": 0.158,
+      "high_scoring_pct": 0.84,
+      "close_game_pct": 0.42
+    },
+    "recent": {
+      "team1_wins_last_2_seasons": 2,
+      "team2_wins_last_2_seasons": 2,
+      "last_winner": "Miami Heat",
+      "home_team_home_record": "0-2",
+      "games_last_2_seasons": 4
+    },
+    "quarters": {
+      "avg_q1_total": 57.2,
+      "avg_q2_total": 53.4,
+      "avg_q3_total": 61.0,
+      "avg_q4_total": 61.5,
+      "avg_first_half": 110.6,
+      "avg_second_half": 122.5,
+      "team1_q1_avg": 28.8,
+      "team2_q1_avg": 28.3,
+      "team1_q4_avg": 32.3,
+      "team2_q4_avg": 29.1,
+      "halftime_leader_wins_pct": 0.83
+    },
+    "matchup_stats": {
+      "team1": {
+        "avg_fgp": 43.2,
+        "avg_tpp": 33.0,
+        "avg_rebounds": 47.3,
+        "avg_assists": 27.8,
+        "avg_turnovers": 13.7,
+        "avg_disruption": 14.0
+      },
+      "team2": {
+        "avg_fgp": 45.7,
+        "avg_tpp": 31.4,
+        "avg_rebounds": 47.7,
+        "avg_assists": 29.3,
+        "avg_turnovers": 13.4,
+        "avg_disruption": 14.3
+      }
+    }
+  },
+  "totals_analysis": {
+    "expected_total": 236.3,
+    "total_diff_from_h2h": 4.1,
+    "team1_h2h_scoring_diff": 1.1,
+    "team2_h2h_scoring_diff": 3.0,
+    "margin_volatility": 14.5,
+    "h2h_total_variance": 24.9,
+    "pace_adjusted_total": 235.5,
+    "defense_factor": 114.0,
+    "recent_scoring_trend": -3.5,
+    "injury_adjusted_total": 199.6
+  },
+  "comparison": {
+    "ppg": 0.2,
+    "net_rating": 9.17,
+    "form": 0.3,
+    "turnovers": 1.0,
+    "rebounds": 2.7,
+    "fgp": -0.9,
+    "three_pt_pct": 0.6,
+    "pace": 1.5,
+    "combined_pace": 106.5,
+    "weighted_form": 10.7,
+    "adjusted_net_rating": 8.77
+  },
+  "signals": [
+    "Miami Heat playing second game today (fatigue factor)",
+    "Utah Jazz playing second game today (fatigue factor)",
+    "Utah Jazz missing 22% of offense with key players limited",
+    "Miami Heat stronger closer (+3.2 Q4 avg in H2H)",
+    "Halftime leader wins 83% in this matchup",
+    "H2H games back-loaded (2H avg 122.5 vs 1H avg 110.6)",
+    "Miami Heat injury concerns: Tyler Herro (11/61 games), Ethan Thompson (5/61 games)",
+    "Utah Jazz injury concerns: Walker Kessler (6/58 games), Kyle Anderson (22/58 games)",
+    "Utah Jazz struggling (2-8 L10)",
+    "Miami Heat strong at home (16-10)",
+    "Utah Jazz poor on road (6-20)",
+    "Miami Heat significantly better net rating (+9.2)",
+    "High-scoring matchup (84% H2H games over 220)",
+    "Competitive series (42% decided by 5 or less)",
+    "Fast-paced matchup (avg 106.5 possessions) - lean OVER",
+    "High-variance H2H (\u00b124.9 pts std dev in totals)",
+    "Utah Jazz more careful vs Miami Heat: 13.4 H2H vs 15.7 season TOV",
+    "Utah Jazz dominates boards vs Miami Heat: 47.7 H2H vs 44.1 season"
+  ],
+  "api_game_id": 16291,
+  "search_context": "### Injury Report\n**Utah Jazz:**\n- Keyonte George - OUT (right ankle sprain)[2][3][6]\n- Elijah Harkless - OUT (hamstring)[2][3]\n- Walker Kessler - OUT (knee/quad or left shoulder injury)[3][6]\n- Kevin Love - OUT (rest)[3][6]\n\n**Miami Heat:**\n- Tyler Herro - OUT (ribs or right costochondral injury to ribs)[2][3][5][6]\n- Pelle Larsson - OUT (elbow)[2][3][5]\n- Terry Rozier - OUT (league-imposed leave or not with team)[2][3][5]\n- Norman Powell - OUT (back or hand)[3][5]\n- Bam Adebayo - Available (hip tightness or right hip tightness)[2][3][5][6]\n- Vladislav Goldin - OUT (G League - Two-Way)[6]\n\n### Betting Lines\nNo current consensus spread, moneyline odds, or over/under total available in search results.\n\n### Line Movement\nNo information on opening lines or notable moves available in search results.\n\n### Recent News\n- Miami Heat lost to Utah Jazz in their previous meeting on January 24, 2026 (147-116 win for Heat); Miami leads season series 1-0[2][3]\n- Utah Jazz record: 16-37 (5th in Northwest); Miami Heat record: 27-26 (2nd in Southeast)[2][3]\n- Expected starters/rotations: Jazz - Lauri Markkanen, Jusuf Nurkic, Isaiah Collier, Ace Bailey; Heat - Davion Mitchell, Norman Powell (out), Bam Adebayo, Kel\u2019el Ware, Andrew Wiggins, Jaime Jaquez Jr., Dru Smith[2]\n- Game live updates indicate ongoing play with Jazz leading (e.g., 32-38 in 2nd quarter, Ace Bailey rebound, Simone Fontecchio miss)[5]\n\n### Additional Context\n### Miami Heat Backcourt Absences and Statuses\nTerry Rozier is listed as **out** at point guard (PG) and shooting guard (SG).[1][3]  \nNorman Powell is listed as **day-to-day (DD)** at shooting guard (SG) and small forward (SF).[4]  \nTyler Herro is listed as **out (O)** at PG and SG; Pelle Larsson is also **out (O)** at SG/SF.[4]  \nThese absences deplete Miami's primary ball-handlers and perimeter scorers, forcing reliance on less experienced options in a game requiring backcourt creation against Utah.[1][3][4]\n\n### Miami Heat Backup Point Guard Options\n**Davion Mitchell** is the starter at PG, with **Kasparas Jakucionis** as the primary backup.[1][3][4]  \n**Dru Smith** is the third-string PG option; **Jahmir Young** is available but listed with a questionable tag (TW) at PG.[1][3]  \nMitchell's role as lead guard matters for Miami, as he provides defense but limited scoring (known for low-usage playmaking), potentially straining output without Rozier/Herro.[1][3]\n\n### Miami Heat Wing Rotation Options\nAt **small forward (SF)**: **Jaime Jaquez Jr.** is the primary backup (also versatile at SG/SF/PF); **Pelle Larsson** (out) and **Simone Fontecchio** follow.[1][4]  \nAt **power forward (PF, wing-eligible)**: **Andrew Wiggins** starter, **Simone Fontecchio** backup, **Nikola Jovic** and **Jaime Jaquez Jr.** third options.[1][4]  \n**Myron Gardner** appears as a depth wing (SG/SF).[4]  \nJaquez Jr. and Fontecchio offer multi-positional versatility for wings, critical for spacing and defense when Powell is sidelined, but lack proven creation volume.[1][4]\n\n### Utah Jazz Perimeter Creators and Statuses\nSearch results provide **no information** on Utah Jazz injuries, roster statuses, or players named George or Harkless (neither appears in standard 2025-26 contexts).  \nNo data available on Utah's offensive efficiency with or without key perimeter creators.[1][2][3][4]  \nThis gap prevents assessment of matchup exploitation by Miami's backcourt.[1][2][3][4]",
+  "injury_impact": {
+    "team1": {
+      "out_players": [
+        {
+          "name": "Tyler Herro",
+          "ppg": 21.9,
+          "status": "Out"
+        },
+        {
+          "name": "Norman Powell",
+          "ppg": 22.3,
+          "status": "Out"
+        }
+      ],
+      "missing_ppg": 44.2,
+      "adjusted_ppg_loss": 19.9
+    },
+    "team2": {
+      "out_players": [
+        {
+          "name": "Keyonte George",
+          "ppg": 23.0,
+          "status": "Out"
+        },
+        {
+          "name": "Walker Kessler",
+          "ppg": 14.3,
+          "status": "Out"
+        }
+      ],
+      "missing_ppg": 37.3,
+      "adjusted_ppg_loss": 16.8
+    },
+    "total_reduction": 36.7,
+    "missing_ppg_diff": -3.1
+  }
+}

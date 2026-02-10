@@ -1,0 +1,511 @@
+{
+  "matchup": {
+    "team1": "Charlotte Hornets",
+    "team2": "Detroit Pistons",
+    "home_team": "Charlotte Hornets"
+  },
+  "current_season": {
+    "team1": {
+      "name": "Charlotte Hornets",
+      "record": "25-29",
+      "conf_rank": 10,
+      "games": 59,
+      "ppg": 116.2,
+      "opp_ppg": 114.5,
+      "ortg": 113.1,
+      "drtg": 111.3,
+      "apg": 26.5,
+      "rpg": 46.3,
+      "topg": 16.2,
+      "net_rating": 1.73,
+      "fgp": 46.1,
+      "tpp": 37.3,
+      "last_ten": "9-1",
+      "last_ten_pct": 0.9,
+      "home_record": "11-13",
+      "away_record": "14-15",
+      "home_win_pct": 0.458,
+      "away_win_pct": 0.483,
+      "pace": 102.9,
+      "recent_ppg": 113.3,
+      "recent_margin": 6.2,
+      "sos": 0.494,
+      "sos_adjusted_net_rating": 1.67
+    },
+    "team2": {
+      "name": "Detroit Pistons",
+      "record": "39-13",
+      "conf_rank": 1,
+      "games": 56,
+      "ppg": 117.1,
+      "opp_ppg": 112.3,
+      "ortg": 115.9,
+      "drtg": 108.5,
+      "apg": 26.8,
+      "rpg": 45.6,
+      "topg": 15.5,
+      "net_rating": 7.45,
+      "fgp": 48.4,
+      "tpp": 34.7,
+      "last_ten": "7-3",
+      "last_ten_pct": 0.7,
+      "home_record": "21-6",
+      "away_record": "16-7",
+      "home_win_pct": 0.778,
+      "away_win_pct": 0.696,
+      "pace": 103.5,
+      "recent_ppg": 117.4,
+      "recent_margin": 12.3,
+      "sos": 0.489,
+      "sos_adjusted_net_rating": 7.34
+    }
+  },
+  "schedule": {
+    "team1": {
+      "days_rest": 0,
+      "streak": "L1",
+      "games_last_7_days": 3,
+      "recent_opponent_avg_win_pct": 0.494,
+      "quality_wins": 4,
+      "quality_losses": 1
+    },
+    "team2": {
+      "days_rest": 0,
+      "streak": "W2",
+      "games_last_7_days": 4,
+      "recent_opponent_avg_win_pct": 0.489,
+      "quality_wins": 4,
+      "quality_losses": 2
+    }
+  },
+  "recent_games": {
+    "team1": [
+      {
+        "vs": "Detroit Pistons",
+        "vs_record": "39-13",
+        "vs_win_pct": 0.75,
+        "result": "L",
+        "score": "104-110",
+        "home": true,
+        "margin": -6,
+        "date": "2026-02-10"
+      },
+      {
+        "vs": "Atlanta Hawks",
+        "vs_record": "26-29",
+        "vs_win_pct": 0.473,
+        "result": "W",
+        "score": "126-119",
+        "home": false,
+        "margin": 7,
+        "date": "2026-02-08"
+      },
+      {
+        "vs": "Houston Rockets",
+        "vs_record": "32-19",
+        "vs_win_pct": 0.627,
+        "result": "W",
+        "score": "109-99",
+        "home": false,
+        "margin": 10,
+        "date": "2026-02-06"
+      },
+      {
+        "vs": "New Orleans Pelicans",
+        "vs_record": "15-40",
+        "vs_win_pct": 0.273,
+        "result": "W",
+        "score": "102-95",
+        "home": true,
+        "margin": 7,
+        "date": "2026-02-02"
+      },
+      {
+        "vs": "San Antonio Spurs",
+        "vs_record": "36-16",
+        "vs_win_pct": 0.692,
+        "result": "W",
+        "score": "111-106",
+        "home": true,
+        "margin": 5,
+        "date": "2026-01-31"
+      },
+      {
+        "vs": "Dallas Mavericks",
+        "vs_record": "19-33",
+        "vs_win_pct": 0.365,
+        "result": "W",
+        "score": "123-121",
+        "home": false,
+        "margin": 2,
+        "date": "2026-01-30"
+      },
+      {
+        "vs": "Memphis Grizzlies",
+        "vs_record": "20-32",
+        "vs_win_pct": 0.385,
+        "result": "W",
+        "score": "112-97",
+        "home": false,
+        "margin": 15,
+        "date": "2026-01-29"
+      },
+      {
+        "vs": "Philadelphia 76ers",
+        "vs_record": "30-23",
+        "vs_win_pct": 0.566,
+        "result": "W",
+        "score": "130-93",
+        "home": true,
+        "margin": 37,
+        "date": "2026-01-26"
+      },
+      {
+        "vs": "Washington Wizards",
+        "vs_record": "14-38",
+        "vs_win_pct": 0.269,
+        "result": "W",
+        "score": "119-115",
+        "home": true,
+        "margin": 4,
+        "date": "2026-01-24"
+      },
+      {
+        "vs": "Orlando Magic",
+        "vs_record": "28-24",
+        "vs_win_pct": 0.538,
+        "result": "W",
+        "score": "124-97",
+        "home": false,
+        "margin": 27,
+        "date": "2026-01-23"
+      }
+    ],
+    "team2": [
+      {
+        "vs": "Charlotte Hornets",
+        "vs_record": "25-29",
+        "vs_win_pct": 0.463,
+        "result": "W",
+        "score": "110-104",
+        "home": false,
+        "margin": 6,
+        "date": "2026-02-10"
+      },
+      {
+        "vs": "New York Knicks",
+        "vs_record": "34-19",
+        "vs_win_pct": 0.642,
+        "result": "W",
+        "score": "118-80",
+        "home": true,
+        "margin": 38,
+        "date": "2026-02-07"
+      },
+      {
+        "vs": "Washington Wizards",
+        "vs_record": "14-38",
+        "vs_win_pct": 0.269,
+        "result": "L",
+        "score": "117-126",
+        "home": true,
+        "margin": -9,
+        "date": "2026-02-06"
+      },
+      {
+        "vs": "Denver Nuggets",
+        "vs_record": "34-20",
+        "vs_win_pct": 0.63,
+        "result": "W",
+        "score": "124-121",
+        "home": true,
+        "margin": 3,
+        "date": "2026-02-04"
+      },
+      {
+        "vs": "Brooklyn Nets",
+        "vs_record": "15-37",
+        "vs_win_pct": 0.288,
+        "result": "W",
+        "score": "130-77",
+        "home": true,
+        "margin": 53,
+        "date": "2026-02-01"
+      },
+      {
+        "vs": "Golden State Warriors",
+        "vs_record": "29-25",
+        "vs_win_pct": 0.537,
+        "result": "W",
+        "score": "131-124",
+        "home": false,
+        "margin": 7,
+        "date": "2026-01-31"
+      },
+      {
+        "vs": "Phoenix Suns",
+        "vs_record": "31-22",
+        "vs_win_pct": 0.585,
+        "result": "L",
+        "score": "96-114",
+        "home": false,
+        "margin": -18,
+        "date": "2026-01-30"
+      },
+      {
+        "vs": "Denver Nuggets",
+        "vs_record": "34-20",
+        "vs_win_pct": 0.63,
+        "result": "W",
+        "score": "109-107",
+        "home": false,
+        "margin": 2,
+        "date": "2026-01-28"
+      },
+      {
+        "vs": "Sacramento Kings",
+        "vs_record": "12-43",
+        "vs_win_pct": 0.218,
+        "result": "W",
+        "score": "139-116",
+        "home": true,
+        "margin": 23,
+        "date": "2026-01-25"
+      },
+      {
+        "vs": "Houston Rockets",
+        "vs_record": "32-19",
+        "vs_win_pct": 0.627,
+        "result": "L",
+        "score": "104-111",
+        "home": true,
+        "margin": -7,
+        "date": "2026-01-24"
+      }
+    ]
+  },
+  "players": {
+    "team1": {
+      "rotation": [
+        {
+          "name": "Miles Bridges",
+          "ppg": 18.1,
+          "plus_minus": -0.3,
+          "games": 58
+        },
+        {
+          "name": "K. Knueppel",
+          "ppg": 18.3,
+          "plus_minus": 1.4,
+          "games": 58
+        },
+        {
+          "name": "Brandon Miller",
+          "ppg": 19.8,
+          "plus_minus": 4.2,
+          "games": 41
+        },
+        {
+          "name": "LaMelo Ball",
+          "ppg": 19.0,
+          "plus_minus": 4.4,
+          "games": 48
+        },
+        {
+          "name": "Moussa Diabate",
+          "ppg": 8.5,
+          "plus_minus": 2.9,
+          "games": 55
+        },
+        {
+          "name": "S. James",
+          "ppg": 5.4,
+          "plus_minus": -1.0,
+          "games": 57
+        }
+      ],
+      "availability_concerns": [
+        "Brandon Miller (41/59 games)",
+        "Grant Williams (13/59 games)",
+        "Tidjane Salaun (36/59 games)"
+      ],
+      "full_strength": false,
+      "top_scorers": "Miller 19.8, Ball 19.0, Knueppel 18.3",
+      "playmaker": "LaMelo Ball 7.2 APG",
+      "hot_hand": "Williams +5.2 (limited: 13 games)",
+      "star_dependency": 17.0,
+      "depth_rating": "balanced (4.9 MPG std dev)",
+      "bench_scoring": 40.6,
+      "injuries": []
+    },
+    "team2": {
+      "rotation": [
+        {
+          "name": "Cade Cunningham",
+          "ppg": 25.0,
+          "plus_minus": 7.8,
+          "games": 49
+        },
+        {
+          "name": "Duncan Robinson",
+          "ppg": 11.9,
+          "plus_minus": 5.9,
+          "games": 54
+        },
+        {
+          "name": "Tobias Harris",
+          "ppg": 13.5,
+          "plus_minus": 4.2,
+          "games": 39
+        },
+        {
+          "name": "Jalen Duren",
+          "ppg": 17.5,
+          "plus_minus": 6.4,
+          "games": 46
+        },
+        {
+          "name": "Ausar Thompson",
+          "ppg": 10.2,
+          "plus_minus": 2.9,
+          "games": 52
+        },
+        {
+          "name": "Isaiah Stewart",
+          "ppg": 9.8,
+          "plus_minus": 0.3,
+          "games": 52
+        }
+      ],
+      "availability_concerns": [
+        "Tobias Harris (39/56 games)",
+        "Caris LeVert (37/56 games)"
+      ],
+      "full_strength": false,
+      "top_scorers": "Cunningham 25.0, Duren 17.5, Harris 13.5",
+      "playmaker": "Cade Cunningham 9.5 APG",
+      "hot_hand": "Cunningham +7.8",
+      "star_dependency": 21.3,
+      "depth_rating": "star-dependent (5.1 MPG std dev)",
+      "bench_scoring": 40.5,
+      "injuries": []
+    }
+  },
+  "h2h": {
+    "summary": {
+      "total_games": 9,
+      "team1_wins_all_time": 2,
+      "team2_wins_all_time": 7,
+      "team1_win_pct": 0.222,
+      "team1_home_wins": 2,
+      "team1_home_losses": 2,
+      "team1_away_wins": 0,
+      "team1_away_losses": 5,
+      "avg_point_diff": -11.2,
+      "team1_avg_points": 99.6,
+      "team2_avg_points": 110.8,
+      "last_5_games": [
+        "Detroit Pistons",
+        "Detroit Pistons",
+        "Detroit Pistons",
+        "Detroit Pistons",
+        "Charlotte Hornets"
+      ],
+      "recent_trend": "team2_hot",
+      "close_games": 3,
+      "blowouts": 2
+    },
+    "patterns": {
+      "avg_total": 210.4,
+      "home_win_pct": 0.684,
+      "high_scoring_pct": 0.08,
+      "close_game_pct": 0.24
+    },
+    "recent": {
+      "team1_wins_last_2_seasons": 2,
+      "team2_wins_last_2_seasons": 4,
+      "last_winner": "Charlotte Hornets",
+      "home_team_home_record": "2-1",
+      "games_last_2_seasons": 6
+    },
+    "quarters": {
+      "avg_q1_total": 58.2,
+      "avg_q2_total": 50.1,
+      "avg_q3_total": 52.7,
+      "avg_q4_total": 47.4,
+      "avg_first_half": 108.3,
+      "avg_second_half": 100.1,
+      "team1_q1_avg": 27.8,
+      "team2_q1_avg": 30.4,
+      "team1_q4_avg": 21.1,
+      "team2_q4_avg": 26.3,
+      "halftime_leader_wins_pct": 0.89
+    },
+    "matchup_stats": {
+      "team1": {
+        "avg_fgp": 39.4,
+        "avg_tpp": 36.2,
+        "avg_rebounds": 41.9,
+        "avg_assists": 23.0,
+        "avg_turnovers": 18.8,
+        "avg_disruption": 12.8
+      },
+      "team2": {
+        "avg_fgp": 45.9,
+        "avg_tpp": 26.0,
+        "avg_rebounds": 50.3,
+        "avg_assists": 24.7,
+        "avg_turnovers": 14.5,
+        "avg_disruption": 16.5
+      }
+    }
+  },
+  "totals_analysis": {
+    "expected_total": 225.0,
+    "total_diff_from_h2h": 22.9,
+    "team1_h2h_scoring_diff": 16.6,
+    "team2_h2h_scoring_diff": 6.3,
+    "margin_volatility": 8.0,
+    "h2h_total_variance": 14.5,
+    "pace_adjusted_total": 236.3,
+    "defense_factor": 109.9,
+    "recent_scoring_trend": 0.5
+  },
+  "comparison": {
+    "ppg": -0.9,
+    "net_rating": -5.72,
+    "form": 0.2,
+    "turnovers": -0.7,
+    "rebounds": 0.7,
+    "fgp": -2.3,
+    "three_pt_pct": 2.6,
+    "pace": -0.6,
+    "combined_pace": 103.2,
+    "weighted_form": -6.1,
+    "adjusted_net_rating": -5.67
+  },
+  "signals": [
+    "Charlotte Hornets playing second game today (fatigue factor)",
+    "Detroit Pistons playing second game today (fatigue factor)",
+    "Detroit Pistons starts faster (+2.6 Q1 avg in H2H)",
+    "Detroit Pistons stronger closer (+5.2 Q4 avg in H2H)",
+    "Halftime leader wins 89% in this matchup",
+    "H2H games front-loaded (1H avg 108.3 vs 2H avg 100.1)",
+    "Charlotte Hornets injury concerns: Brandon Miller (41/59 games), Grant Williams (13/59 games)",
+    "Detroit Pistons injury concerns: Tobias Harris (39/56 games), Caris LeVert (37/56 games)",
+    "Charlotte Hornets hot form (9-1 L10)",
+    "Detroit Pistons hot form (7-3 L10)",
+    "Detroit Pistons solid on road (16-7)",
+    "Detroit Pistons significantly better net rating (+5.7)",
+    "Detroit Pistons 4-2 in recent H2H",
+    "Detroit Pistons won 4+ of last 5 H2H meetings",
+    "Lower-scoring matchup (only 8% H2H games over 220)",
+    "Charlotte Hornets FG% suppressed vs Detroit Pistons: 39.4% H2H vs 46.1% season",
+    "Detroit Pistons cold from 3 vs Charlotte Hornets: 26.0% H2H vs 34.7% season",
+    "Charlotte Hornets more careless vs Detroit Pistons: 18.8 H2H vs 16.2 season TOV",
+    "Charlotte Hornets struggles on boards vs Detroit Pistons: 41.9 H2H vs 46.3 season",
+    "Detroit Pistons dominates boards vs Charlotte Hornets: 50.3 H2H vs 45.6 season"
+  ],
+  "api_game_id": 16289,
+  "search_context": "### Injury Report\n**Charlotte Hornets:**\n- Coby White - OUT (right/left calf strain, ruled out through All-Star break).[1][2]\n- Malaki Branham - OUT (non-injury/trade, no longer with team).[1][2]\n- Xavier Tillman - OUT (not with team, traded).[1]\n\n**Detroit Pistons:**\n- Ronald Holland II (Ron Holland II) - OUT (personal reasons).[1][2]\n- Jalen Duren - DAY-TO-DAY/probable (right knee soreness, expected to play with monitored minutes).[1][2]\n- Tolu Smith - OUT (calf, not expected back until mid-February).[1]\n\nLaMelo Ball, Miles Bridges, Kon Knueppel, Cody Martin, Tidjane Salaun available for Hornets; Cade Cunningham, Ausar Thompson, Kevin Huerter, Dario \u0160ari\u0107 available for Pistons.[1]\n\n### Betting Lines\nNo current consensus spread, moneyline odds, or over/under total available in search results.\n\n### Line Movement\nNo information on opening lines or notable moves available in search results.\n\n### Recent News\nGame occurred Monday (February 9, 2026); fight in third quarter led to ejections of Hornets' Moussa Diabate and Miles Bridges, Pistons' Jalen Duren and Isaiah Stewart; Hornets coach Charles Lee ejected in fourth quarter.[4]\nPistons entered 38-13 (1st in Central), won four straight at home prior; Hornets 24-28 or 25-28, on nine-game win streak prior (including 26 points from Miles Bridges, 23 from Kon Knueppel vs. Hawks).[1][2]\nSeason series: Pistons lead 1-0 (112-86 win Dec. 20, 2025).[1]\n\n### Additional Context\n### Jalen Duren Status and Minutes\nNo minutes restrictions or expected playing time reported for the upcoming game due to knee soreness; prior reports reference a fight ejection, not injury. On February 9, 2026, Duren played 20 minutes, scoring 15 points before ejection for fighting activity (shoving Diabate in the face, retaliating with a punch at Bridges) with ~7 minutes left in the third quarter[1][2][3]. This ejection disrupted Detroit's paint dominance (outscored Charlotte 60-26 inside), where Duren anchors defense and rim-running offense critical against Charlotte's pick-and-roll and transition[3].\n\n### Miles Bridges Discipline Status\nNo confirmed suspension or additional discipline announced as of February 9-10, 2026; NBA league office expected to review for further actions, including bench-leaving violation. Bridges ejected for fighting (charging Duren, throwing left-handed punch; tussling with Stewart from bench)[1][2][3]. As a key forward, his potential absence reduces Charlotte's offensive firepower, especially as heavy underdogs reliant on scoring amid 21 turnovers and poor paint efficiency in the prior matchup[3]."
+}

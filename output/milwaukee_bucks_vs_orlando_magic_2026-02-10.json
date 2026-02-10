@@ -1,0 +1,551 @@
+{
+  "matchup": {
+    "team1": "Orlando Magic",
+    "team2": "Milwaukee Bucks",
+    "home_team": "Orlando Magic"
+  },
+  "current_season": {
+    "team1": {
+      "name": "Orlando Magic",
+      "record": "28-24",
+      "conf_rank": 7,
+      "games": 56,
+      "ppg": 116.0,
+      "opp_ppg": 115.6,
+      "ortg": 112.7,
+      "drtg": 111.7,
+      "apg": 26.3,
+      "rpg": 44.2,
+      "topg": 14.3,
+      "net_rating": 1.05,
+      "fgp": 46.4,
+      "tpp": 33.8,
+      "last_ten": "4-6",
+      "last_ten_pct": 0.4,
+      "home_record": "16-8",
+      "away_record": "10-14",
+      "home_win_pct": 0.667,
+      "away_win_pct": 0.417,
+      "pace": 103.5,
+      "recent_ppg": 113.8,
+      "recent_margin": 2.1,
+      "sos": 0.525,
+      "sos_adjusted_net_rating": 1.3
+    },
+    "team2": {
+      "name": "Milwaukee Bucks",
+      "record": "21-30",
+      "conf_rank": 12,
+      "games": 55,
+      "ppg": 112.0,
+      "opp_ppg": 114.8,
+      "ortg": 110.5,
+      "drtg": 113.9,
+      "apg": 26.1,
+      "rpg": 40.9,
+      "topg": 14.7,
+      "net_rating": -3.4,
+      "fgp": 48.0,
+      "tpp": 39.4,
+      "last_ten": "4-6",
+      "last_ten_pct": 0.4,
+      "home_record": "12-12",
+      "away_record": "9-17",
+      "home_win_pct": 0.5,
+      "away_win_pct": 0.346,
+      "pace": 100.8,
+      "recent_ppg": 109.8,
+      "recent_margin": -5.8,
+      "sos": 0.484,
+      "sos_adjusted_net_rating": -3.56
+    }
+  },
+  "schedule": {
+    "team1": {
+      "days_rest": 0,
+      "streak": "W3",
+      "games_last_7_days": 4,
+      "recent_opponent_avg_win_pct": 0.525,
+      "quality_wins": 2,
+      "quality_losses": 4
+    },
+    "team2": {
+      "days_rest": 0,
+      "streak": "L1",
+      "games_last_7_days": 4,
+      "recent_opponent_avg_win_pct": 0.484,
+      "quality_wins": 0,
+      "quality_losses": 5
+    }
+  },
+  "recent_games": {
+    "team1": [
+      {
+        "vs": "Milwaukee Bucks",
+        "vs_record": "21-30",
+        "vs_win_pct": 0.412,
+        "result": "W",
+        "score": "118-99",
+        "home": true,
+        "margin": 19,
+        "date": "2026-02-10"
+      },
+      {
+        "vs": "Utah Jazz",
+        "vs_record": "17-37",
+        "vs_win_pct": 0.315,
+        "result": "W",
+        "score": "120-117",
+        "home": true,
+        "margin": 3,
+        "date": "2026-02-08"
+      },
+      {
+        "vs": "Brooklyn Nets",
+        "vs_record": "15-37",
+        "vs_win_pct": 0.288,
+        "result": "W",
+        "score": "118-98",
+        "home": true,
+        "margin": 20,
+        "date": "2026-02-06"
+      },
+      {
+        "vs": "Oklahoma City Thunder",
+        "vs_record": "41-13",
+        "vs_win_pct": 0.759,
+        "result": "L",
+        "score": "92-128",
+        "home": false,
+        "margin": -36,
+        "date": "2026-02-04"
+      },
+      {
+        "vs": "San Antonio Spurs",
+        "vs_record": "36-16",
+        "vs_win_pct": 0.692,
+        "result": "L",
+        "score": "103-112",
+        "home": false,
+        "margin": -9,
+        "date": "2026-02-02"
+      },
+      {
+        "vs": "Toronto Raptors",
+        "vs_record": "32-22",
+        "vs_win_pct": 0.593,
+        "result": "W",
+        "score": "130-120",
+        "home": true,
+        "margin": 10,
+        "date": "2026-01-31"
+      },
+      {
+        "vs": "Miami Heat",
+        "vs_record": "28-27",
+        "vs_win_pct": 0.509,
+        "result": "W",
+        "score": "133-124",
+        "home": false,
+        "margin": 9,
+        "date": "2026-01-29"
+      },
+      {
+        "vs": "Cleveland Cavaliers",
+        "vs_record": "33-21",
+        "vs_win_pct": 0.611,
+        "result": "L",
+        "score": "98-114",
+        "home": false,
+        "margin": -16,
+        "date": "2026-01-27"
+      },
+      {
+        "vs": "Cleveland Cavaliers",
+        "vs_record": "33-21",
+        "vs_win_pct": 0.611,
+        "result": "L",
+        "score": "105-119",
+        "home": true,
+        "margin": -14,
+        "date": "2026-01-25"
+      },
+      {
+        "vs": "Charlotte Hornets",
+        "vs_record": "25-29",
+        "vs_win_pct": 0.463,
+        "result": "L",
+        "score": "97-124",
+        "home": true,
+        "margin": -27,
+        "date": "2026-01-23"
+      }
+    ],
+    "team2": [
+      {
+        "vs": "Orlando Magic",
+        "vs_record": "28-24",
+        "vs_win_pct": 0.538,
+        "result": "L",
+        "score": "99-118",
+        "home": false,
+        "margin": -19,
+        "date": "2026-02-10"
+      },
+      {
+        "vs": "Indiana Pacers",
+        "vs_record": "13-40",
+        "vs_win_pct": 0.245,
+        "result": "W",
+        "score": "105-99",
+        "home": true,
+        "margin": 6,
+        "date": "2026-02-07"
+      },
+      {
+        "vs": "New Orleans Pelicans",
+        "vs_record": "15-40",
+        "vs_win_pct": 0.273,
+        "result": "W",
+        "score": "141-137",
+        "home": true,
+        "margin": 4,
+        "date": "2026-02-05"
+      },
+      {
+        "vs": "Chicago Bulls",
+        "vs_record": "24-30",
+        "vs_win_pct": 0.444,
+        "result": "W",
+        "score": "131-115",
+        "home": true,
+        "margin": 16,
+        "date": "2026-02-04"
+      },
+      {
+        "vs": "Boston Celtics",
+        "vs_record": "34-19",
+        "vs_win_pct": 0.642,
+        "result": "L",
+        "score": "79-107",
+        "home": false,
+        "margin": -28,
+        "date": "2026-02-01"
+      },
+      {
+        "vs": "Washington Wizards",
+        "vs_record": "14-38",
+        "vs_win_pct": 0.269,
+        "result": "L",
+        "score": "99-109",
+        "home": false,
+        "margin": -10,
+        "date": "2026-01-30"
+      },
+      {
+        "vs": "Philadelphia 76ers",
+        "vs_record": "30-23",
+        "vs_win_pct": 0.566,
+        "result": "L",
+        "score": "122-139",
+        "home": false,
+        "margin": -17,
+        "date": "2026-01-28"
+      },
+      {
+        "vs": "Denver Nuggets",
+        "vs_record": "34-20",
+        "vs_win_pct": 0.63,
+        "result": "L",
+        "score": "100-102",
+        "home": true,
+        "margin": -2,
+        "date": "2026-01-24"
+      },
+      {
+        "vs": "Oklahoma City Thunder",
+        "vs_record": "41-13",
+        "vs_win_pct": 0.759,
+        "result": "L",
+        "score": "102-122",
+        "home": true,
+        "margin": -20,
+        "date": "2026-01-22"
+      },
+      {
+        "vs": "Atlanta Hawks",
+        "vs_record": "26-29",
+        "vs_win_pct": 0.473,
+        "result": "W",
+        "score": "112-110",
+        "home": false,
+        "margin": 2,
+        "date": "2026-01-19"
+      }
+    ]
+  },
+  "players": {
+    "team1": {
+      "rotation": [
+        {
+          "name": "Paolo Banchero",
+          "ppg": 20.8,
+          "plus_minus": -1.2,
+          "games": 45
+        },
+        {
+          "name": "Desmond Bane",
+          "ppg": 18.9,
+          "plus_minus": 1.3,
+          "games": 55
+        },
+        {
+          "name": "Franz Wagner",
+          "ppg": 21.3,
+          "plus_minus": 1.8,
+          "games": 30
+        },
+        {
+          "name": "Anthony Black",
+          "ppg": 15.6,
+          "plus_minus": 0.3,
+          "games": 56
+        },
+        {
+          "name": "Wendell Carter Jr.",
+          "ppg": 11.9,
+          "plus_minus": 0.7,
+          "games": 54
+        },
+        {
+          "name": "Jalen Suggs",
+          "ppg": 14.0,
+          "plus_minus": 4.4,
+          "games": 32
+        }
+      ],
+      "availability_concerns": [
+        "Franz Wagner (30/56 games)",
+        "Jalen Suggs (32/56 games)"
+      ],
+      "full_strength": false,
+      "top_scorers": "Wagner 21.3, Banchero 20.8, Bane 18.9",
+      "playmaker": "Jalen Suggs 5.4 APG (limited: 32 games)",
+      "hot_hand": "Suggs +4.4 (limited: 32 games)",
+      "star_dependency": 18.4,
+      "depth_rating": "star-dependent (7.2 MPG std dev)",
+      "bench_scoring": 36.7,
+      "injuries": []
+    },
+    "team2": {
+      "rotation": [
+        {
+          "name": "Kevin Porter Jr.",
+          "ppg": 16.6,
+          "plus_minus": -2.1,
+          "games": 30
+        },
+        {
+          "name": "Ryan Rollins",
+          "ppg": 16.4,
+          "plus_minus": -0.5,
+          "games": 55
+        },
+        {
+          "name": "A.J. Green",
+          "ppg": 10.7,
+          "plus_minus": 0.0,
+          "games": 51
+        },
+        {
+          "name": "Giannis Antetokounmpo",
+          "ppg": 27.1,
+          "plus_minus": 3.8,
+          "games": 32
+        },
+        {
+          "name": "Myles Turner",
+          "ppg": 12.7,
+          "plus_minus": -1.0,
+          "games": 52
+        },
+        {
+          "name": "Kyle Kuzma",
+          "ppg": 12.6,
+          "plus_minus": -3.6,
+          "games": 51
+        }
+      ],
+      "availability_concerns": [
+        "Kevin Porter Jr. (30/55 games)",
+        "Giannis Antetokounmpo (32/55 games)",
+        "Taurean Prince (12/55 games)"
+      ],
+      "full_strength": false,
+      "top_scorers": "Antetokounmpo 27.1, Jr. 16.6, Rollins 16.4",
+      "playmaker": "Kevin Porter Jr. 7.1 APG (limited: 30 games)",
+      "hot_hand": "Antetokounmpo +3.8 (limited: 32 games)",
+      "star_dependency": 24.2,
+      "depth_rating": "star-dependent (5.1 MPG std dev)",
+      "bench_scoring": 43.1,
+      "injuries": []
+    }
+  },
+  "h2h": {
+    "summary": {
+      "total_games": 9,
+      "team1_wins_all_time": 4,
+      "team2_wins_all_time": 5,
+      "team1_win_pct": 0.444,
+      "team1_home_wins": 3,
+      "team1_home_losses": 1,
+      "team1_away_wins": 1,
+      "team1_away_losses": 4,
+      "avg_point_diff": 7.9,
+      "team1_avg_points": 112.5,
+      "team2_avg_points": 104.5,
+      "last_5_games": [
+        "Orlando Magic",
+        "Milwaukee Bucks",
+        "Orlando Magic",
+        "Milwaukee Bucks",
+        "Milwaukee Bucks"
+      ],
+      "recent_trend": "balanced",
+      "close_games": 4,
+      "blowouts": 5
+    },
+    "patterns": {
+      "avg_total": 217.0,
+      "home_win_pct": 0.842,
+      "high_scoring_pct": 0.12,
+      "close_game_pct": 0.28
+    },
+    "recent": {
+      "team1_wins_last_2_seasons": 2,
+      "team2_wins_last_2_seasons": 3,
+      "last_winner": "Milwaukee Bucks",
+      "home_team_home_record": "1-1",
+      "games_last_2_seasons": 5
+    },
+    "quarters": {
+      "avg_q1_total": 51.8,
+      "avg_q2_total": 54.5,
+      "avg_q3_total": 54.7,
+      "avg_q4_total": 56.0,
+      "avg_first_half": 106.3,
+      "avg_second_half": 110.7,
+      "team1_q1_avg": 27.4,
+      "team2_q1_avg": 24.4,
+      "team1_q4_avg": 29.2,
+      "team2_q4_avg": 26.8,
+      "halftime_leader_wins_pct": 0.78
+    },
+    "matchup_stats": {
+      "team1": {
+        "avg_fgp": 45.4,
+        "avg_tpp": 32.1,
+        "avg_rebounds": 42.0,
+        "avg_assists": 24.5,
+        "avg_turnovers": 11.7,
+        "avg_disruption": 14.9
+      },
+      "team2": {
+        "avg_fgp": 49.5,
+        "avg_tpp": 38.0,
+        "avg_rebounds": 39.1,
+        "avg_assists": 19.4,
+        "avg_turnovers": 18.0,
+        "avg_disruption": 13.7
+      }
+    }
+  },
+  "totals_analysis": {
+    "expected_total": 224.4,
+    "total_diff_from_h2h": 11.0,
+    "team1_h2h_scoring_diff": 3.5,
+    "team2_h2h_scoring_diff": 7.5,
+    "margin_volatility": 10.2,
+    "h2h_total_variance": 8.6,
+    "pace_adjusted_total": 228.0,
+    "defense_factor": 112.8,
+    "recent_scoring_trend": -7.6,
+    "injury_adjusted_total": 212.2
+  },
+  "comparison": {
+    "ppg": 4.0,
+    "net_rating": 4.45,
+    "form": 0.0,
+    "turnovers": 0.4,
+    "rebounds": 3.3,
+    "fgp": -1.6,
+    "three_pt_pct": -5.6,
+    "pace": 2.7,
+    "combined_pace": 102.2,
+    "weighted_form": 7.9,
+    "adjusted_net_rating": 4.86
+  },
+  "signals": [
+    "Orlando Magic playing second game today (fatigue factor)",
+    "Milwaukee Bucks playing second game today (fatigue factor)",
+    "Milwaukee Bucks missing 24% of offense with key players limited",
+    "Orlando Magic won 3 straight",
+    "Orlando Magic starts faster (+3.0 Q1 avg in H2H)",
+    "Orlando Magic stronger closer (+2.4 Q4 avg in H2H)",
+    "Halftime leader wins 78% in this matchup",
+    "H2H games back-loaded (2H avg 110.7 vs 1H avg 106.3)",
+    "Orlando Magic injury concerns: Franz Wagner (30/56 games), Jalen Suggs (32/56 games)",
+    "Milwaukee Bucks injury concerns: Kevin Porter Jr. (30/55 games), Giannis Antetokounmpo (32/55 games)",
+    "Orlando Magic strong at home (16-8)",
+    "Milwaukee Bucks poor on road (9-17)",
+    "Orlando Magic +4.0 PPG edge",
+    "Orlando Magic significantly better net rating (+4.5)",
+    "Lower-scoring matchup (only 12% H2H games over 220)",
+    "Both teams scoring below season avg in recent games (-7.6 combined)",
+    "Orlando Magic more careful vs Milwaukee Bucks: 11.7 H2H vs 14.3 season TOV",
+    "Milwaukee Bucks more careless vs Orlando Magic: 18.0 H2H vs 14.7 season TOV"
+  ],
+  "api_game_id": 16292,
+  "odds": {
+    "spread": {
+      "home": {
+        "line": -10.0,
+        "price": -110
+      },
+      "away": {
+        "line": 10.0,
+        "price": -110
+      }
+    },
+    "total": {
+      "line": 220.5,
+      "over": -110,
+      "under": -110
+    },
+    "moneyline": {
+      "home": -420,
+      "away": 330
+    }
+  },
+  "search_context": "### Injury Report\n**Milwaukee Bucks:**\n- Giannis Antetokounmpo: Out (right calf strain)[1][4][5][7]\n- Taurean Prince: Out (neck surgery)[1][4][5][7]\n- Alex Antetokounmpo: Out (G-League/two-way)[1][5][7]\n\n**Orlando Magic:**\n- Colin Castleton: Out (G-League/two-way or left thumb fracture)[1][5]\n- Franz Wagner: Available (left ankle sprain/soreness)[1][4][5]\n- Paolo Banchero: Questionable (groin)[3]\n- Moritz Wagner: Out (left ACL or knee)[3]\n\nBobby Portis and Gary Harris are off the Bucks injury report.[1]\n\n### Betting Lines\nNo current consensus spread, moneyline odds, or over/under total available in search results.\n\n### Line Movement\nNo information on opening lines or notable moves available in search results.\n\n### Recent News\nBucks recently signed Cam Thomas, who is available and not on the injury report.[1][5] Bucks won three games in a row before this road trip.[1] Giannis Antetokounmpo eyes return on February 20, post-All-Star break.[1] Magic lead their division with a stronger home record (16-8).[4] Projected Bucks starters include Ryan Rollins, Gary Trent Jr., Kyle Kuzma, Bobby Portis, Myles Turner.[4] Projected Magic starters include Jalen Suggs, Cole Anthony, Franz Wagner (if available), Paolo Banchero, Wendell Carter Jr.[4]\n\n### Additional Context\n### Giannis Antetokounmpo Injury Status\nGiannis Antetokounmpo is out for the Milwaukee Bucks vs. Orlando Magic game on February 9, 2026, due to a right calf strain sustained on January 23, 2026\u2014his second calf injury this season.[2][4] Projected recovery is 4-6 weeks, with a potential return around February 20, 2026, post-All-Star break, based on his workouts progressing to post-up drills by early February.[2] This matters for the game as Giannis averages 28.0 points, 10.0 rebounds, and 5.6 assists in 30 games this season, driving Bucks' offense.[1]\n\n### Bucks Record and Performance Without Giannis\nBucks are 6-14 without Giannis this season, compared to 15-15 with him, across 50 games total (overall record 21-29).[2] Current standing is 12th in Eastern Conference (18-27 as of early February reports, updated to 21-29 post-deadline).[1][2] No specific offensive efficiency or pace stats without Giannis are detailed, nor recent three-game winning streak data; Bucks show no tanking intent, adding Cam Thomas from buyout market to push for postseason.[2] Poor record without him highlights reliance on his playmaking, impacting scoring against defenses like Orlando's.\n\n### Orlando Magic Home Court Record\nMagic hold a 16-8 home record, as referenced in query context (no direct confirmation in results).[user query] No specific data on covering spreads against depleted opponents; results lack Magic performance details vs. undermanned teams.[all] Home edge matters as Bucks face travel and roster gaps without Giannis, testing Orlando's form in a favorable venue.",
+  "injury_impact": {
+    "team1": {
+      "out_players": [],
+      "missing_ppg": 0,
+      "adjusted_ppg_loss": 0.0
+    },
+    "team2": {
+      "out_players": [
+        {
+          "name": "Giannis Antetokounmpo",
+          "ppg": 27.1,
+          "status": "Out"
+        }
+      ],
+      "missing_ppg": 27.1,
+      "adjusted_ppg_loss": 12.2
+    },
+    "total_reduction": 12.2,
+    "missing_ppg_diff": 12.2
+  }
+}
