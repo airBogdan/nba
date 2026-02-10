@@ -1,6 +1,6 @@
 {
   "starting": 1000.0,
-  "current": 722.8318181818182,
+  "current": 828.5,
   "transactions": [
     {
       "date": "2026-02-05",
@@ -169,6 +169,27 @@
       "amount": -12.0,
       "bet_id": "cde2ab15-b1d6-4c13-ac3a-ea42841aa306",
       "description": "Detroit Pistons @ Charlotte Hornets - moneyline Detroit Pistons"
+    },
+    {
+      "date": "2026-02-10",
+      "type": "result",
+      "amount": 44.57727272727273,
+      "bet_id": "6d0237ad-d4b0-4a03-874c-f86c8640120b",
+      "description": "WIN: Sacramento Kings @ New Orleans Pelicans (+$21.23)"
+    },
+    {
+      "date": "2026-02-10",
+      "type": "result",
+      "amount": 38.18181818181818,
+      "bet_id": "4533804c-c380-473f-b4ff-6681967e3330",
+      "description": "WIN: Oklahoma City Thunder @ Los Angeles Lakers (+$18.18)"
+    },
+    {
+      "date": "2026-02-10",
+      "type": "result",
+      "amount": 22.909090909090907,
+      "bet_id": "cde2ab15-b1d6-4c13-ac3a-ea42841aa306",
+      "description": "WIN: Detroit Pistons @ Charlotte Hornets (+$10.91)"
     }
   ]
 }

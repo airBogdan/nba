@@ -504,22 +504,112 @@
         "key_lesson": "Even gutted rosters can keep games competitive at home, but the edge identification was correct - trust large net rating differentials combined with injury advantages.",
         "summary": "The ratings edge and injury analysis were spot-on for the win, though Sacramento's 126 points shows even depleted teams can score in today's NBA. Process was solid - would make this bet again."
       }
+    },
+    {
+      "id": "6d0237ad-d4b0-4a03-874c-f86c8640120b",
+      "game_id": "16294",
+      "matchup": "Sacramento Kings @ New Orleans Pelicans",
+      "bet_type": "moneyline",
+      "pick": "New Orleans Pelicans",
+      "line": null,
+      "confidence": "high",
+      "units": 2.0,
+      "reasoning": "Kings missing 6 rotation players including Sabonis, LaVine, Murray, Monk (48+ PPG absent). Sacramento on 12-game losing streak with 3-26 road record. Pelicans just beat this same Kings team by 26 points two days ago. Catastrophic injury differential creates overwhelming edge.",
+      "primary_edge": "injury_edge",
+      "date": "2026-02-10",
+      "created_at": "2026-02-10T09:32:03.812875+00:00",
+      "odds_price": -110,
+      "amount": 23.35,
+      "result": "win",
+      "winner": "New Orleans Pelicans",
+      "final_score": "Sacramento Kings 94 @ New Orleans Pelicans 120",
+      "actual_total": 214,
+      "actual_margin": 26,
+      "profit_loss": 2.0,
+      "reflection": "The injury edge was perfectly valid - Pelicans won by the exact same 26-point margin as two days prior. When a team is missing 48+ PPG of production, on a 12-game skid, with a 3-26 road record, and just got blown out by the same opponent, the edge is as clear as it gets.",
+      "structured_reflection": {
+        "edge_valid": true,
+        "missed_factors": [],
+        "process_assessment": "sound",
+        "key_lesson": "Catastrophic injury differentials combined with recent H2H blowouts and extreme road struggles create reliable edges worth maximum confidence.",
+        "summary": "The injury edge was perfectly valid - Pelicans won by the exact same 26-point margin as two days prior. When a team is missing 48+ PPG of production, on a 12-game skid, with a 3-26 road record, and just got blown out by the same opponent, the edge is as clear as it gets."
+      }
+    },
+    {
+      "id": "4533804c-c380-473f-b4ff-6681967e3330",
+      "game_id": "16297",
+      "matchup": "Oklahoma City Thunder @ Los Angeles Lakers",
+      "bet_type": "moneyline",
+      "pick": "Oklahoma City Thunder",
+      "line": null,
+      "confidence": "medium",
+      "units": 1.0,
+      "reasoning": "OKC has massive +11.6 net rating differential - our highest-performing edge type (87.5% win rate). Thunder 4-1 in recent H2H including 119-110 win at this venue 2 days ago. Elite 18-7 road record demonstrates they travel well.",
+      "primary_edge": "ratings_edge",
+      "date": "2026-02-10",
+      "created_at": "2026-02-10T09:32:03.812926+00:00",
+      "odds_price": -110,
+      "amount": 20.0,
+      "result": "win",
+      "winner": "Oklahoma City Thunder",
+      "final_score": "Oklahoma City Thunder 119 @ Los Angeles Lakers 110",
+      "actual_total": 229,
+      "actual_margin": -9,
+      "profit_loss": 1.0,
+      "reflection": "The ratings edge proved valid as OKC won by exactly 9 points, matching their statistical superiority. The process was sound - we correctly identified the massive net rating differential and recent venue-specific success as the primary drivers.",
+      "structured_reflection": {
+        "edge_valid": true,
+        "missed_factors": [],
+        "process_assessment": "sound",
+        "key_lesson": "Large net rating differentials combined with recent H2H dominance at the same venue create reliable edges.",
+        "summary": "The ratings edge proved valid as OKC won by exactly 9 points, matching their statistical superiority. The process was sound - we correctly identified the massive net rating differential and recent venue-specific success as the primary drivers."
+      }
+    },
+    {
+      "id": "cde2ab15-b1d6-4c13-ac3a-ea42841aa306",
+      "game_id": "16289",
+      "matchup": "Detroit Pistons @ Charlotte Hornets",
+      "bet_type": "moneyline",
+      "pick": "Detroit Pistons",
+      "line": null,
+      "confidence": "medium",
+      "units": 1.0,
+      "reasoning": "Detroit +5.7 net rating advantage with 7-2 H2H dominance (-11.2 avg margin). Elite 16-7 road record. Charlotte shoots just 39.4% FG in H2H matchups. Net rating differential is our best-performing edge type despite Charlotte's recent 9-1 run.",
+      "primary_edge": "ratings_edge",
+      "date": "2026-02-10",
+      "created_at": "2026-02-10T09:32:03.812941+00:00",
+      "odds_price": -110,
+      "amount": 12.0,
+      "result": "win",
+      "winner": "Detroit Pistons",
+      "final_score": "Detroit Pistons 110 @ Charlotte Hornets 104",
+      "actual_total": 214,
+      "actual_margin": -6,
+      "profit_loss": 1.0,
+      "reflection": "The +5.7 net rating edge and H2H dominance played out exactly as expected with Detroit winning by 6. Charlotte's recent 9-1 run was correctly identified as a potential concern but appropriately weighted below the more predictive structural advantages.",
+      "structured_reflection": {
+        "edge_valid": true,
+        "missed_factors": [],
+        "process_assessment": "sound",
+        "key_lesson": "Net rating differentials combined with strong H2H patterns remain reliable edges even against teams on hot streaks.",
+        "summary": "The +5.7 net rating edge and H2H dominance played out exactly as expected with Detroit winning by 6. Charlotte's recent 9-1 run was correctly identified as a potential concern but appropriately weighted below the more predictive structural advantages."
+      }
     }
   ],
   "summary": {
-    "total_bets": 21,
-    "wins": 15,
+    "total_bets": 24,
+    "wins": 18,
     "losses": 6,
     "pushes": 0,
-    "win_rate": 0.714,
-    "total_units_wagered": 28.5,
-    "net_units": 12.5,
-    "roi": 0.439,
+    "win_rate": 0.75,
+    "total_units_wagered": 32.5,
+    "net_units": 16.5,
+    "roi": 0.508,
     "by_confidence": {
       "medium": {
-        "wins": 8,
+        "wins": 10,
         "losses": 4,
-        "win_rate": 0.667
+        "win_rate": 0.714
       },
       "low": {
         "wins": 1,
@@ -527,9 +617,9 @@
         "win_rate": 1.0
       },
       "high": {
-        "wins": 6,
+        "wins": 7,
         "losses": 2,
-        "win_rate": 0.75
+        "win_rate": 0.778
       }
     },
     "by_primary_edge": {
@@ -539,9 +629,9 @@
         "win_rate": 0.5
       },
       "ratings_edge": {
-        "wins": 7,
+        "wins": 9,
         "losses": 1,
-        "win_rate": 0.875
+        "win_rate": 0.9
       },
       "rest_advantage": {
         "wins": 1,
@@ -549,16 +639,16 @@
         "win_rate": 1.0
       },
       "injury_edge": {
-        "wins": 6,
+        "wins": 7,
         "losses": 4,
-        "win_rate": 0.6
+        "win_rate": 0.636
       }
     },
     "by_bet_type": {
       "moneyline": {
-        "wins": 9,
+        "wins": 12,
         "losses": 2,
-        "win_rate": 0.818
+        "win_rate": 0.857
       },
       "spread": {
         "wins": 3,
@@ -571,6 +661,6 @@
         "win_rate": 0.6
       }
     },
-    "current_streak": "W1"
+    "current_streak": "W4"
   }
 }
