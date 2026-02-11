@@ -352,6 +352,35 @@ Relevant team news from the last 48 hours — roster moves, rotation changes, no
 
 Facts only. If a section has no relevant information, state that briefly."""
 
+SEARCH_PLAYER_NEWS_PROMPT = """I need a player-focused news report for an NBA game today.
+
+**Game: {matchup}**
+
+**Key players to research:**
+{player_list}
+
+Research and report on the following, organized under these exact headers:
+
+### Player Form & Streaks
+Notable hot/cold streaks, recent scoring runs, shooting slumps, or usage changes for any of the listed players.
+
+### Rotation & Role Changes
+Any recent rotation adjustments, minute increases/decreases, or role changes (e.g., moved to bench, new starting lineup).
+
+### Returning Players & Ramp-Ups
+Players recently back from injury who may be on minute restrictions or still ramping up.
+
+### Trade & Roster Buzz
+Recent trade rumors, buyout candidates, or roster moves affecting either team.
+
+### Matchup Storylines
+Notable individual matchups, revenge games, or storylines between these specific players.
+
+### Rest & Load Management
+Any known rest plans, back-to-back management, or load management decisions.
+
+Skip injury statuses (already covered), skip betting lines and odds (already covered), skip box-score stats. Focus on narrative context and recent developments only. Facts only — if a section has nothing relevant, skip it entirely."""
+
 SEARCH_FOLLOWUP_GENERATION_PROMPT = """Review the initial search results below and identify any important gaps for betting analysis.
 
 Matchup: {matchup}

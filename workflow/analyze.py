@@ -226,19 +226,45 @@ def _save_game_file(game: Dict[str, Any]) -> None:
 
 async def _enrich_games_with_search(games: List[Dict[str, Any]], date: str) -> None:
     """Run web search enrichment on games and save results to their JSON files."""
-    from .search import sanitize_label, search_enrich
+    from .search import sanitize_label, search_enrich, search_player_news
 
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_LLM_CALLS)
 
     async def enrich_one(game: Dict[str, Any]) -> None:
-        async with semaphore:
-            matchup_str = format_matchup_string(game["matchup"])
-            game_label = sanitize_label(matchup_str)
-            print(f"  {matchup_str}")
-            result = await search_enrich(game, matchup_str, game_label)
-            if result:
-                game["search_context"] = result
-                _save_game_file(game)
+        matchup_str = format_matchup_string(game["matchup"])
+        game_label = sanitize_label(matchup_str)
+        print(f"  {matchup_str}")
+
+        async def _do_template():
+            async with semaphore:
+                return await search_enrich(game, matchup_str, game_label)
+
+        async def _do_player_news():
+            async with semaphore:
+                return await search_player_news(game, matchup_str)
+
+        template_result, player_result = await asyncio.gather(
+            _do_template(), _do_player_news(), return_exceptions=True
+        )
+
+        # Handle exceptions from either search
+        if isinstance(template_result, Exception):
+            print(f"    search error: {template_result}")
+            template_result = None
+        if isinstance(player_result, Exception):
+            print(f"    player news error: {player_result}")
+            player_result = None
+
+        # Merge results
+        parts = []
+        if template_result:
+            parts.append(template_result)
+        if player_result:
+            parts.append("### Player & Team News\n" + player_result)
+
+        if parts:
+            game["search_context"] = "\n\n".join(parts)
+            _save_game_file(game)
 
     tasks = [enrich_one(game) for game in games]
     results = await asyncio.gather(*tasks, return_exceptions=True)

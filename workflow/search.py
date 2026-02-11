@@ -1,12 +1,13 @@
 """Web search enrichment for betting workflow."""
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from .llm import complete
 from .prompts import (
     SEARCH_FOLLOWUP_GENERATION_PROMPT,
     SEARCH_PERPLEXITY_WRAPPER,
+    SEARCH_PLAYER_NEWS_PROMPT,
     SEARCH_QUERY_SYSTEM,
     SEARCH_TEMPLATE_PROMPT,
 )
@@ -120,4 +121,81 @@ async def search_enrich(
 
     except Exception as e:
         print(f"    search failed: {e}")
+        return None
+
+
+def _get_available_players(
+    game_data: Dict[str, Any], team_key: str, max_players: int = 5
+) -> List[Dict[str, Any]]:
+    """Get top available (non-Out/Doubtful) players from rotation.
+
+    Args:
+        game_data: Full game data dict.
+        team_key: "team1" or "team2".
+        max_players: Maximum players to return.
+
+    Returns:
+        List of rotation dicts (name, ppg, etc.) for available players.
+    """
+    team_data = game_data.get("players", {}).get(team_key, {})
+    rotation = team_data.get("rotation", [])
+    injuries = team_data.get("injuries", [])
+
+    # Build set of out/doubtful player names (lowercased)
+    out_names = set()
+    for inj in injuries:
+        status = (inj.get("status") or "").strip()
+        if status in ("Out", "Doubtful"):
+            name = (inj.get("player") or inj.get("name") or "").strip().lower()
+            if name:
+                out_names.add(name)
+
+    available = []
+    for player in rotation:
+        name = (player.get("name") or "").strip().lower()
+        if name and name not in out_names:
+            available.append(player)
+        if len(available) >= max_players:
+            break
+
+    return available
+
+
+async def search_player_news(
+    game_data: Dict[str, Any], matchup_str: str
+) -> Optional[str]:
+    """Search for player-focused news via Perplexity.
+
+    Returns markdown text or None on failure.
+    """
+    perplexity_model = _get_perplexity_model()
+
+    team1_players = _get_available_players(game_data, "team1")
+    team2_players = _get_available_players(game_data, "team2")
+
+    if not team1_players and not team2_players:
+        return None
+
+    # Build player list string
+    team1_name = game_data.get("current_season", {}).get("team1", {}).get("name", "Team 1")
+    team2_name = game_data.get("current_season", {}).get("team2", {}).get("name", "Team 2")
+
+    lines = []
+    if team1_players:
+        names = [f"{p['name']} ({p.get('ppg', '?')} PPG)" for p in team1_players]
+        lines.append(f"**{team1_name}:** {', '.join(names)}")
+    if team2_players:
+        names = [f"{p['name']} ({p.get('ppg', '?')} PPG)" for p in team2_players]
+        lines.append(f"**{team2_name}:** {', '.join(names)}")
+
+    player_list = "\n".join(lines)
+    prompt = SEARCH_PLAYER_NEWS_PROMPT.format(matchup=matchup_str, player_list=player_list)
+
+    try:
+        result = await complete(prompt, model=perplexity_model)
+        if result:
+            print(f"    player news: {len(result)} chars")
+        return result or None
+    except Exception as e:
+        print(f"    player news failed: {e}")
         return None
