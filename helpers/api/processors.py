@@ -1,9 +1,11 @@
 """Data processing functions and hybrid fetch+process functions."""
 
+import asyncio
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from zoneinfo import ZoneInfo
 
 from ..utils import get_current_nba_season_year
 from .types import (
@@ -15,6 +17,8 @@ from .types import (
     ScheduledGame,
 )
 from .client import fetch_nba_api, get_team_statistics, get_games_by_date
+
+_ET = ZoneInfo("America/New_York")
 
 RECENT_GAMES_LIMIT = 10
 TOP_PLAYERS = 10
@@ -371,23 +375,59 @@ async def get_team_recent_games(
     return results
 
 
-async def get_scheduled_games(season: int, date: str) -> List[ScheduledGame]:
+def _utc_to_et_date(date_start_str: Optional[str]) -> Optional[str]:
+    """Convert a UTC ISO 8601 timestamp to a US Eastern date string (YYYY-MM-DD).
+
+    Returns None if the input is missing or unparseable.
     """
-    Get scheduled games for a date with filtered fields.
+    if not date_start_str:
+        return None
+    try:
+        # Parse ISO 8601 UTC timestamp (e.g. "2026-02-11T00:30:00.000Z")
+        utc_dt = datetime.fromisoformat(date_start_str.replace("Z", "+00:00"))
+        et_dt = utc_dt.astimezone(_ET)
+        return et_dt.strftime("%Y-%m-%d")
+    except (ValueError, TypeError):
+        return None
+
+
+async def get_scheduled_games(season: int, target_date: str) -> List[ScheduledGame]:
+    """
+    Get scheduled games for a US Eastern date with filtered fields.
+
+    Queries the API for both the target UTC date and the next day, then filters
+    to games whose start time falls on the target date in US Eastern time.
 
     Args:
         season: NBA season year (e.g., 2025)
-        date: Date in YYYY-MM-DD format (e.g., '2026-02-01')
+        target_date: Date in YYYY-MM-DD format (e.g., '2026-02-01')
 
     Returns:
         List of games with id, date_start, status, and teams (id/name only)
     """
-    raw_games = await get_games_by_date(season, date)
-    if not raw_games:
-        return []
+    next_date = (datetime.strptime(target_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+
+    day1_games, day2_games = await asyncio.gather(
+        get_games_by_date(season, target_date),
+        get_games_by_date(season, next_date),
+    )
+
+    all_games = (day1_games or []) + (day2_games or [])
+
+    # Deduplicate by game ID
+    seen_ids: set[int] = set()
+    unique_games = []
+    for game in all_games:
+        gid = game["id"]
+        if gid not in seen_ids:
+            seen_ids.add(gid)
+            unique_games.append(game)
 
     results: List[ScheduledGame] = []
-    for game in raw_games:
+    for game in unique_games:
+        et_date = _utc_to_et_date(game["date"]["start"])
+        if et_date != target_date:
+            continue
         results.append({
             "id": game["id"],
             "date_start": game["date"]["start"],

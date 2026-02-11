@@ -12,6 +12,8 @@ from helpers.api import (
 )
 from helpers.api.processors import (
     compute_league_avg_efficiency,
+    get_scheduled_games,
+    _utc_to_et_date,
     _FALLBACK_EFFICIENCY,
     LEAGUE_EFFICIENCY_CACHE,
 )
@@ -402,3 +404,123 @@ class TestComputeLeagueAvgEfficiency:
             result = await compute_league_avg_efficiency(2025)
 
         assert 100 < result < 120
+
+
+class TestUtcToEtDate:
+    """Tests for _utc_to_et_date helper."""
+
+    def test_evening_game_previous_day(self):
+        """UTC midnight+ maps to previous ET day (7:30 PM ET game)."""
+        assert _utc_to_et_date("2026-02-11T00:30:00.000Z") == "2026-02-10"
+
+    def test_afternoon_game_same_day(self):
+        """UTC afternoon maps to same ET day (1:00 PM ET game)."""
+        assert _utc_to_et_date("2026-02-11T18:00:00.000Z") == "2026-02-11"
+
+    def test_late_night_game(self):
+        """UTC 3:30 AM maps to previous ET day (10:30 PM ET game)."""
+        assert _utc_to_et_date("2026-02-11T03:30:00.000Z") == "2026-02-10"
+
+    def test_5am_utc_midnight_et(self):
+        """UTC 5:00 AM = midnight ET, start of new day."""
+        assert _utc_to_et_date("2026-02-11T05:00:00.000Z") == "2026-02-11"
+
+    def test_none_input(self):
+        assert _utc_to_et_date(None) == None
+
+    def test_empty_string(self):
+        assert _utc_to_et_date("") == None
+
+    def test_invalid_string(self):
+        assert _utc_to_et_date("not-a-date") == None
+
+    def test_dst_transition(self):
+        """During EDT (UTC-4), 3:30 AM UTC = 11:30 PM ET prev day."""
+        # March 8, 2026 is in EDT
+        assert _utc_to_et_date("2026-03-15T03:30:00.000Z") == "2026-03-14"
+
+    def test_dst_afternoon(self):
+        """During EDT, 18:00 UTC = 2:00 PM ET same day."""
+        assert _utc_to_et_date("2026-03-15T18:00:00.000Z") == "2026-03-15"
+
+
+class TestGetScheduledGamesETFilter:
+    """Tests for get_scheduled_games with ET date filtering."""
+
+    def _make_game(self, game_id, date_start, home_name, away_name):
+        return {
+            "id": game_id,
+            "date": {"start": date_start},
+            "status": {"clock": None, "halftime": False, "long": "Scheduled"},
+            "teams": {
+                "home": {"id": game_id * 10, "name": home_name},
+                "visitors": {"id": game_id * 10 + 1, "name": away_name},
+            },
+        }
+
+    @pytest.mark.asyncio
+    async def test_filters_by_et_date(self):
+        """Only games whose ET date matches the target are returned."""
+        # Feb 10 evening games show up on UTC Feb 11
+        evening_game = self._make_game(1, "2026-02-11T00:30:00.000Z", "Knicks", "Pacers")
+        # Feb 11 afternoon game
+        afternoon_game = self._make_game(2, "2026-02-11T18:00:00.000Z", "Lakers", "Celtics")
+        # Feb 11 evening game shows up on UTC Feb 12
+        next_evening = self._make_game(3, "2026-02-12T01:00:00.000Z", "Suns", "Mavs")
+
+        async def mock_get_games(season, date_str):
+            if date_str == "2026-02-11":
+                return [evening_game, afternoon_game]
+            elif date_str == "2026-02-12":
+                return [next_evening]
+            return None
+
+        with patch("helpers.api.processors.get_games_by_date", side_effect=mock_get_games):
+            result = await get_scheduled_games(2025, "2026-02-11")
+
+        # Should include afternoon_game (ET=Feb 11) and next_evening (ET=Feb 11)
+        # Should exclude evening_game (ET=Feb 10)
+        ids = [g["id"] for g in result]
+        assert 2 in ids  # afternoon, same day
+        assert 3 in ids  # evening, ET is Feb 11
+        assert 1 not in ids  # evening from previous ET day
+
+    @pytest.mark.asyncio
+    async def test_both_api_calls_empty(self):
+        """Returns empty list when both date queries return nothing."""
+        async def mock_get_games(season, date_str):
+            return None
+
+        with patch("helpers.api.processors.get_games_by_date", side_effect=mock_get_games):
+            result = await get_scheduled_games(2025, "2026-02-11")
+
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_deduplicates_by_game_id(self):
+        """Games appearing in both queries are deduplicated."""
+        game = self._make_game(1, "2026-02-11T18:00:00.000Z", "Lakers", "Celtics")
+
+        async def mock_get_games(season, date_str):
+            # Same game returned by both date queries
+            return [game]
+
+        with patch("helpers.api.processors.get_games_by_date", side_effect=mock_get_games):
+            result = await get_scheduled_games(2025, "2026-02-11")
+
+        assert len(result) == 1
+
+    @pytest.mark.asyncio
+    async def test_queries_correct_dates(self):
+        """Verifies both target date and next day are queried."""
+        calls = []
+
+        async def mock_get_games(season, date_str):
+            calls.append(date_str)
+            return None
+
+        with patch("helpers.api.processors.get_games_by_date", side_effect=mock_get_games):
+            await get_scheduled_games(2025, "2026-02-11")
+
+        assert "2026-02-11" in calls
+        assert "2026-02-12" in calls

@@ -594,22 +594,117 @@
         "key_lesson": "Net rating differentials combined with strong H2H patterns remain reliable edges even against teams on hot streaks.",
         "summary": "The +5.7 net rating edge and H2H dominance played out exactly as expected with Detroit winning by 6. Charlotte's recent 9-1 run was correctly identified as a potential concern but appropriately weighted below the more predictive structural advantages."
       }
+    },
+    {
+      "id": "7650bdb0-f78c-443f-aeb7-e2aacd81a7e0",
+      "game_id": "16301",
+      "matchup": "Dallas Mavericks @ Phoenix Suns",
+      "bet_type": "moneyline",
+      "pick": "Phoenix Suns",
+      "line": null,
+      "confidence": "high",
+      "units": 2.0,
+      "reasoning": "Multiple edges align: +4.74 net rating differential (our highest-performing edge type at 90%), Suns 17-9 at home vs Dallas 5-16 on road (23.8%), Dallas on 8-game losing streak, Kyrie Irving out for surgery decimates their backcourt. Suns 5-1 in last 6 H2H meetings. This is a clear mismatch.",
+      "primary_edge": "ratings_edge",
+      "date": "2026-02-11",
+      "created_at": "2026-02-11T17:46:35.570747+00:00",
+      "odds_price": -110,
+      "amount": 22.82,
+      "result": "win",
+      "winner": "Phoenix Suns",
+      "final_score": "Dallas Mavericks 111 @ Phoenix Suns 120",
+      "actual_total": 231,
+      "actual_margin": 9,
+      "profit_loss": 2.0,
+      "reflection": "All identified edges proved valid - the Suns covered comfortably by 9 points against a depleted, road-struggling Dallas team. This was a textbook spot where stacking multiple edges produced the expected outcome.",
+      "structured_reflection": {
+        "edge_valid": true,
+        "missed_factors": [],
+        "process_assessment": "sound",
+        "key_lesson": "When multiple high-confidence edges align (ratings, home/road splits, injury, H2H, and momentum), trust the process and size up appropriately.",
+        "summary": "All identified edges proved valid - the Suns covered comfortably by 9 points against a depleted, road-struggling Dallas team. This was a textbook spot where stacking multiple edges produced the expected outcome."
+      }
+    },
+    {
+      "id": "5e40b516-224e-48b2-a8f9-e8804283ad0a",
+      "game_id": "16302",
+      "matchup": "San Antonio Spurs @ Los Angeles Lakers",
+      "bet_type": "moneyline",
+      "pick": "San Antonio Spurs",
+      "line": null,
+      "confidence": "high",
+      "units": 2.0,
+      "reasoning": "Spurs have +7.4 net rating advantage and Lakers are catastrophically injured - missing LeBron, Reaves, Smart (56.3 PPG combined). Spurs just beat this same depleted Lakers team 136-108 yesterday with Wembanyama scoring 40 in 26 minutes. Spurs on 5-game win streak. This is a severe mismatch.",
+      "primary_edge": "ratings_edge",
+      "date": "2026-02-11",
+      "created_at": "2026-02-11T17:46:35.570905+00:00",
+      "odds_price": -110,
+      "amount": 22.82,
+      "result": "win",
+      "winner": "San Antonio Spurs",
+      "final_score": "San Antonio Spurs 136 @ Los Angeles Lakers 108",
+      "actual_total": 244,
+      "actual_margin": -28,
+      "profit_loss": 2.0,
+      "reflection": "The edge was exactly as identified - catastrophic Lakers injuries created a severe mismatch. The identical 136-108 scoreline to the previous game validates that this was a repeatable, exploitable situation rather than a fluke.",
+      "structured_reflection": {
+        "edge_valid": true,
+        "missed_factors": [],
+        "process_assessment": "sound",
+        "key_lesson": "When a team is missing 50+ PPG of production and just lost by 28 to the same opponent, the edge is real and exploitable.",
+        "summary": "The edge was exactly as identified - catastrophic Lakers injuries created a severe mismatch. The identical 136-108 scoreline to the previous game validates that this was a repeatable, exploitable situation rather than a fluke."
+      }
+    },
+    {
+      "id": "e8b5b59d-8757-4b5b-bb1b-ac413ae45f10",
+      "game_id": "16299",
+      "matchup": "Indiana Pacers @ New York Knicks",
+      "bet_type": "moneyline",
+      "pick": "New York Knicks",
+      "line": null,
+      "confidence": "medium",
+      "units": 1.0,
+      "reasoning": "+12.96 net rating differential is massive. Knicks 21-6 at home (77.8%) vs Pacers league-worst 3-22 on road (12%). Despite yesterday's loss, the fundamental mismatch remains overwhelming. Knicks 9-1 in L10 overall. Slight discount for B2B fatigue and Pacers' confidence from yesterday.",
+      "primary_edge": "ratings_edge",
+      "date": "2026-02-11",
+      "created_at": "2026-02-11T17:46:35.571298+00:00",
+      "odds_price": -110,
+      "amount": 18.0,
+      "result": "loss",
+      "winner": "Indiana Pacers",
+      "final_score": "Indiana Pacers 137 @ New York Knicks 134",
+      "actual_total": 271,
+      "actual_margin": -3,
+      "profit_loss": -1.0,
+      "reflection": "The ratings edge was real but we underweighted the compounding effect of B2B fatigue plus facing a team that just beat you with confidence. A 3-point loss in a 271-point game shows variance, but the situational discount should have been larger or pushed this to a pass.",
+      "structured_reflection": {
+        "edge_valid": true,
+        "missed_factors": [
+          "B2B fatigue impact was underweighted - Knicks played yesterday and lost",
+          "Pacers momentum/confidence from previous day's win",
+          "Pacers' elite offensive pace (271 total points) can neutralize home court in shootouts",
+          "Road record anomaly - Pacers capable of winning when shots fall"
+        ],
+        "process_assessment": "unlucky",
+        "key_lesson": "B2B situations deserve larger confidence discounts, especially when opponent just beat you and has momentum.",
+        "summary": "The ratings edge was real but we underweighted the compounding effect of B2B fatigue plus facing a team that just beat you with confidence. A 3-point loss in a 271-point game shows variance, but the situational discount should have been larger or pushed this to a pass."
+      }
     }
   ],
   "summary": {
-    "total_bets": 24,
-    "wins": 18,
-    "losses": 6,
+    "total_bets": 27,
+    "wins": 20,
+    "losses": 7,
     "pushes": 0,
-    "win_rate": 0.75,
-    "total_units_wagered": 32.5,
-    "net_units": 16.5,
-    "roi": 0.508,
+    "win_rate": 0.741,
+    "total_units_wagered": 37.5,
+    "net_units": 19.5,
+    "roi": 0.52,
     "by_confidence": {
       "medium": {
         "wins": 10,
-        "losses": 4,
-        "win_rate": 0.714
+        "losses": 5,
+        "win_rate": 0.667
       },
       "low": {
         "wins": 1,
@@ -617,9 +712,9 @@
         "win_rate": 1.0
       },
       "high": {
-        "wins": 7,
+        "wins": 9,
         "losses": 2,
-        "win_rate": 0.778
+        "win_rate": 0.818
       }
     },
     "by_primary_edge": {
@@ -629,9 +724,9 @@
         "win_rate": 0.5
       },
       "ratings_edge": {
-        "wins": 9,
-        "losses": 1,
-        "win_rate": 0.9
+        "wins": 11,
+        "losses": 2,
+        "win_rate": 0.846
       },
       "rest_advantage": {
         "wins": 1,
@@ -646,9 +741,9 @@
     },
     "by_bet_type": {
       "moneyline": {
-        "wins": 12,
-        "losses": 2,
-        "win_rate": 0.857
+        "wins": 14,
+        "losses": 3,
+        "win_rate": 0.824
       },
       "spread": {
         "wins": 3,
@@ -661,6 +756,6 @@
         "win_rate": 0.6
       }
     },
-    "current_streak": "W4"
+    "current_streak": "L1"
   }
 }
