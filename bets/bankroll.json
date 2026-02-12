@@ -1,6 +1,6 @@
 {
   "starting": 1000.0,
-  "current": 851.630909090909,
+  "current": 811.630909090909,
   "transactions": [
     {
       "date": "2026-02-05",
@@ -225,6 +225,20 @@
       "amount": 43.56545454545454,
       "bet_id": "5e40b516-224e-48b2-a8f9-e8804283ad0a",
       "description": "WIN: San Antonio Spurs @ Los Angeles Lakers (+$20.75)"
+    },
+    {
+      "date": "2026-02-12",
+      "type": "bet",
+      "amount": -20.0,
+      "bet_id": "7f9f2202-4e89-4f52-a01c-e042955968f3",
+      "description": "Milwaukee Bucks @ Oklahoma City Thunder - total under"
+    },
+    {
+      "date": "2026-02-12",
+      "type": "bet",
+      "amount": -20.0,
+      "bet_id": "e1ffaf8f-0803-4244-860b-54eb186ed05e",
+      "description": "Dallas Mavericks @ Los Angeles Lakers - total under"
     }
   ]
 }
