@@ -2,7 +2,7 @@
 
 ## Setup
 
-Requires `OPENROUTER_API_KEY` in `.env` file.
+Requires `OPENROUTER_API_KEY` in `.env` file. For Polymarket placement, also set `POLYMARKET_PRIVATE_KEY` and `POLYMARKET_FUNDER`.
 
 ```bash
 python3.13 betting.py init
@@ -12,7 +12,7 @@ python3.13 betting.py init
 
 ### 1. Generate matchup data
 ```bash
-python3.13 main.py 2026-02-11
+python3.13 main.py 2026-02-12
 ```
 Creates analysis files in `output/` for today's games.
 
@@ -32,14 +32,25 @@ python3.13 betting.py results
 - Evaluates bets and updates history
 - Appends results to journal
 
-### 4. Update strategy (after 5+ bets)
+### 4. Place bets on Polymarket
+```bash
+python3.13 polymarket.py
+```
+- Resolves active bets against live Polymarket markets
+- Places market buy orders via the CLOB API
+- Skips bets where the live price drifted >5pp from the analysis price
+- Requires `POLYMARKET_PRIVATE_KEY` and `POLYMARKET_FUNDER` in `.env`
+
+### 5. Update strategy (after 15+ bets)
 ```bash
 python3.13 betting.py update-strategy
 ```
-Rewrites `strategy.md` based on performance patterns.
+Produces 1-3 targeted adjustments to `strategy.md` based on performance patterns.
 
 ## Files
 
+- `polymarket.py` - Place bets on Polymarket from active.json
+- `polymarket_helpers/` - Polymarket Gamma API client, team matching, odds conversion
 - `active.json` - Open bets awaiting results
 - `history.json` - Completed bets with outcomes
 - `strategy.md` - Evolving betting strategy

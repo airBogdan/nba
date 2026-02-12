@@ -85,6 +85,21 @@ python betting.py update-strategy
 
 Requires 15+ completed bets. Aggregates performance patterns and reflections from history, then asks the LLM to produce 1-3 targeted adjustments to `bets/strategy.md`. Changes are appended to a change log for auditability. Previous strategy versions are archived (last 10 kept).
 
+### Place bets on Polymarket
+
+```bash
+python polymarket.py
+```
+
+Resolves active bets for the given date against live Polymarket markets and places market buy orders via the CLOB API. Includes a price drift gate — bets are skipped if the live price moved more than 5pp from the analysis price.
+
+Requires additional `.env` variables:
+
+```
+POLYMARKET_PRIVATE_KEY=...  # Polygon wallet private key
+POLYMARKET_FUNDER=...       # Funder address for CLOB client
+```
+
 ## Running Tests
 
 ```bash
@@ -118,6 +133,8 @@ workflow/
     init.py             # Bets directory initialization
 output/                 # Generated matchup JSON files
 bets/
+    polymarket.py       # Place bets on Polymarket from active.json
+    polymarket_helpers/  # Polymarket API client, matching, odds conversion
     active.json         # Open bets awaiting results
     history.json        # Completed bets with outcomes
     bankroll.json       # Bankroll tracking (auto-created at $1000)
