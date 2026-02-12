@@ -1,6 +1,5 @@
 """Place bets on Polymarket from active.json."""
 
-import argparse
 import os
 
 from dotenv import load_dotenv
@@ -45,12 +44,15 @@ def resolve_token_id(bet: dict, events: list[dict]) -> tuple[str, float] | None:
 
 def create_clob_client(private_key: str, funder: str) -> ClobClient:
     """Create an authenticated ClobClient."""
-    return ClobClient(
+    client = ClobClient(
         host=POLYMARKET_HOST,
         chain_id=POLYGON,
         key=private_key,
+        signature_type=1,
         funder=funder,
     )
+    client.set_api_creds(client.create_or_derive_api_creds())
+    return client
 
 
 def place_bet(client: ClobClient, token_id: str, amount: float) -> dict:
@@ -60,8 +62,8 @@ def place_bet(client: ClobClient, token_id: str, amount: float) -> dict:
     return client.post_order(signed_order, orderType="FOK")
 
 
-def run(date: str) -> None:
-    """Load active bets for date, resolve markets, and place orders."""
+def run() -> None:
+    """Load unplaced active bets, resolve markets, and place orders."""
     load_dotenv()
 
     private_key = os.environ.get("POLYMARKET_PRIVATE_KEY")
@@ -71,74 +73,76 @@ def run(date: str) -> None:
         return
 
     all_active = get_active_bets()
-    bets = [b for b in all_active if b["date"] == date and not b.get("placed_polymarket")]
+    bets = [b for b in all_active if not b.get("placed_polymarket")]
     if not bets:
-        print(f"No active bets for {date}")
+        print("No unplaced active bets")
         return
 
-    print(f"Found {len(bets)} active bet(s) for {date}")
+    # Group bets by date for event fetching
+    dates = sorted({b["date"] for b in bets})
+    print(f"Found {len(bets)} unplaced bet(s) across {len(dates)} date(s)")
 
     client = create_clob_client(private_key, funder)
-
-    events = fetch_nba_events(date)
-    if not events:
-        print("No Polymarket events found for this date")
-        return
-
-    print(f"Found {len(events)} Polymarket event(s)\n")
 
     placed = 0
     skipped = 0
 
-    for bet in bets:
-        label = f"{bet['matchup']} | {bet['bet_type']} {bet['pick']}"
-        result = resolve_token_id(bet, events)
-
-        if not result:
-            print(f"SKIP: {label} -> no matching market")
-            skipped += 1
+    for date in dates:
+        date_bets = [b for b in bets if b["date"] == date]
+        events = fetch_nba_events(date)
+        if not events:
+            print(f"\n{date}: no Polymarket events found, skipping {len(date_bets)} bet(s)")
+            skipped += len(date_bets)
             continue
 
-        token_id, poly_price = result
-        odds_price = bet.get("odds_price")
-        if odds_price:
-            print(f"  {format_price_comparison(odds_price, poly_price)}")
+        print(f"\n{date}: {len(events)} event(s), {len(date_bets)} bet(s)")
 
-        # Price drift gate: skip if live price moved too far from analysis price
-        analysis_price = bet.get("poly_price")
-        if analysis_price is not None:
-            drift = abs(poly_price - analysis_price)
-            if drift > PRICE_DRIFT_TOLERANCE:
-                print(f"SKIP: {label} -> price drifted {drift:.2f} "
-                      f"(was {analysis_price:.2f}, now {poly_price:.2f})")
+        for bet in date_bets:
+            label = f"{bet['matchup']} | {bet['bet_type']} {bet['pick']}"
+            result = resolve_token_id(bet, events)
+
+            if not result:
+                print(f"  SKIP: {label} -> no matching market")
                 skipped += 1
                 continue
 
-        amount = bet.get("amount", 0)
-        if amount <= 0:
-            print(f"SKIP: {label} -> no amount set")
-            skipped += 1
-            continue
+            token_id, poly_price = result
+            odds_price = bet.get("odds_price")
+            if odds_price:
+                print(f"  {format_price_comparison(odds_price, poly_price)}")
 
-        try:
-            resp = place_bet(client, token_id, amount)
-            print(f"OK:   {label} -> ${amount:.2f} placed")
-            print(f"      Response: {resp}")
-            bet["placed_polymarket"] = True
-            placed += 1
-        except Exception as e:
-            print(f"FAIL: {label} -> {e}")
-            skipped += 1
+            # Price drift gate: skip if live price moved too far from analysis price
+            analysis_price = bet.get("poly_price")
+            if analysis_price is not None:
+                drift = abs(poly_price - analysis_price)
+                if drift > PRICE_DRIFT_TOLERANCE:
+                    print(f"  SKIP: {label} -> price drifted {drift:.2f} "
+                          f"(was {analysis_price:.2f}, now {poly_price:.2f})")
+                    skipped += 1
+                    continue
+
+            amount = bet.get("amount", 0)
+            if amount <= 0:
+                print(f"  SKIP: {label} -> no amount set")
+                skipped += 1
+                continue
+
+            try:
+                resp = place_bet(client, token_id, amount)
+                print(f"  OK:   {label} -> ${amount:.2f} placed")
+                print(f"        Response: {resp}")
+                bet["placed_polymarket"] = True
+                placed += 1
+            except Exception as e:
+                print(f"  FAIL: {label} -> {e}")
+                skipped += 1
 
     save_active_bets(all_active)
     print(f"\nDone: {placed} placed, {skipped} skipped")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Place active bets on Polymarket")
-    parser.add_argument("--date", required=True, help="Date to place bets for (YYYY-MM-DD)")
-    args = parser.parse_args()
-    run(args.date)
+    run()
 
 
 if __name__ == "__main__":
